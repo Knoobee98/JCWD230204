@@ -1,27 +1,31 @@
-import axios from "axios";
-import logo from "./logo.svg";
+
 import "./App.css";
-import { useEffect, useState } from "react";
 
-function App() {
-  const [message, setMessage] = useState("");
+import { Routes, Route} from "react-router-dom";
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_BASE_URL}/greetings`
-      );
-      setMessage(data?.message || "");
-    })();
-  }, []);
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        {message}
-      </header>
-    </div>
-  );
-}
+import LandingPage from "./pages/landingPage";
 
-export default App;
+
+export default function App(){
+  return(
+    <>
+    {/* navbar */}
+    <div className="flex justify-around gap-4 bg-blue-400 items-center">
+        <div className="flex gap-7 items-center">
+          <div>Logo</div>
+          <div className="py-3">
+            <input type="text" className="border rounded-md text-center w-[500px] h-[50px]" placeholder="mau cari apa hari ini?" />
+          </div>
+        </div>
+        <div className="">
+          <button className="bg-blue-200 rounded-md w-[100px] h-[50px]" >register</button>
+        </div>
+      </div>
+
+      {/* routes */}
+      <Routes>
+        <Route path="/" element={<LandingPage/>} />
+      </Routes>
+    </>
+  )
+};
