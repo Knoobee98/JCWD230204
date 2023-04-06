@@ -1,13 +1,10 @@
 import axios from 'axios';
 import { useState, useEffect } from 'react';
-<<<<<<< HEAD
 import { useNavigate } from 'react-router-dom';
-=======
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import NavbarUser from "../../components/navbaruser";
 import HomeMenu from "../../components/homemenu";
 import Footer from "../../components/footer";
->>>>>>> main
 
 import Banner from '.././../assets/img/banner2.jpg';
 import NavBar from '../../components/navbaruser';
@@ -48,15 +45,12 @@ export default function LandingPage(){
 
     return(
         <>
-<<<<<<< HEAD
         <div className='bg-[#1c1c1c]'>
             <NavBar className="w-screen"/>
             <HomeMenu className="w-screen"/>
         </div>
-=======
         <NavbarUser/>
         <HomeMenu/>
->>>>>>> main
         <div className='flex flex-col justify-center gap-3 px-6 pb-4 pt-4 bg-[#1c1c1c]'>
             
 
