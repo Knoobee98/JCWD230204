@@ -7,7 +7,6 @@ import Footer from "../../components/footer";
 
 import Banner from '.././../assets/img/banner2.jpg';
 import NavBar from '../../components/navbaruser';
-import HomeMenu from "../../components/homemenu";
 import Footer from '../../components/footer';
 
 export default function LandingPage(){
