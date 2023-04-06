@@ -1,24 +1,23 @@
-require("dotenv/config");
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { join } = require("path");
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT;
 const app = express();
-app.use(
-  cors({
-    origin: [
-      process.env.WHITELISTED_DOMAIN &&
-        process.env.WHITELISTED_DOMAIN.split(","),
-    ],
-  })
-);
-
+app.use(cors());
 app.use(express.json());
+app.use('/Public', express.static('Public'))
 
 //#region API ROUTES
+const {adminRouter, productsRouter, usersRouter, transactionRouter, rajaOngkirAPIRouter, openCageRouter} = require('./routers');
+app.use('/api/admin', adminRouter);
+app.use('/api/products', productsRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/transaction', transactionRouter);
+app.use('/api/rajaOngkir', rajaOngkirAPIRouter);
+app.use('/api/openCage', openCageRouter)
 
-// ===========================
 // NOTE : Add your routes here
 
 app.get("/api", (req, res) => {
@@ -72,3 +71,17 @@ app.listen(PORT, (err) => {
     console.log(`APP RUNNING at ${PORT} ✅`);
   }
 });
+
+// sequelize synchronous
+// const Sequelize = require('sequelize')
+// const Models = require('./models')
+
+// Models.sequelize.sync({
+//     force: false,
+//     alter: true,
+//     logging: console.log
+// }).then(function () {
+//     console.log('database is synchronized')
+// }).catch(function (error){
+//     console.log(error, 'something went wrong with the database')
+// })
