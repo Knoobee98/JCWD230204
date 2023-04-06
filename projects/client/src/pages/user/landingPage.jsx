@@ -3,8 +3,6 @@ import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import NavbarUser from "../../components/navbaruser";
 import HomeMenu from "../../components/homemenu";
-import Footer from "../../components/footer";
-
 import Banner from '.././../assets/img/banner2.jpg';
 import NavBar from '../../components/navbaruser';
 import Footer from '../../components/footer';
