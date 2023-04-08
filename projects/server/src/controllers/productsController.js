@@ -11,6 +11,7 @@ const discounts_categories = db.discount_category;
 const discount = db.discounts;
 const transactions = db.transactions;
 const transactions_details = db.transactions_details;
+const stock_history = db.stock_history;
 const cart = db.carts;
 const users = db.users;
 
@@ -468,22 +469,51 @@ module.exports = {
                 }
             })
 
-            if(option === "plus"){
-                await cart.update({qty: parseInt(findItem.qty) + 1}, {
-                    where: {
-                        id
-                    }
-                })
-            } else if(option === "min") {
-                await cart.update({qty: parseInt(findItem.qty) - 1}, {
-                    where: {
-                        id
-                    }
-                })
-            } else {
+            let newQty;
 
+            if(option === "plus"){
+                newQty = parseInt(findItem.qty) + 1;
+                // await cart.update({qty: parseInt(findItem.qty) + 1}, {
+                //     where: {
+                //         id
+                //     }
+                // })
+            } else if(option === "min") {
+                newQty = parseInt(findItem.qty) - 1;
+                // await cart.update({qty: parseInt(findItem.qty) - 1}, {
+                //     where: {
+                //         id
+                //     }
+                // })
+            } else {
+                res.status(400).send({
+                    isError: true,
+                    message: "invalid option",
+                    data: null
+                })
             }
 
+            if(newQty < 0){
+                res.status(400).send({
+                    isError: true,
+                    message: "quantity cannot negative",
+                    data: null
+                })
+            }
+
+            await cart.update({qty: newQty}, {
+                where: {
+                    id
+                }
+            })
+
+            if(newQty < 1){
+                await cart.destroy({
+                    where: {
+                        id
+                    }
+                })
+            }
 
             res.status(201).send({
                 isError: false,

@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import HomeMenu from "../../components/homemenu";
+import Navbar from "../../components/navbaruser";
 import NavbarUser from "../../components/navbaruser";
 import Banner from '.././../assets/img/banner2.jpg';
 import Footer from '../../components/footer';
@@ -41,10 +42,10 @@ export default function LandingPage(){
     return(
         <>
         <div className='bg-[#1c1c1c]'>
-            <NavBar className="w-screen"/>
+            <Navbar className="w-screen"/>
             <HomeMenu className="w-screen"/>
         </div>
-
+        
         <NavbarUser/>
         <HomeMenu/>
         <NavbarUser/>
@@ -142,7 +143,6 @@ export default function LandingPage(){
                 </div>
             </div>
         </div>
-        <Footer/>
         </>
     )
 }

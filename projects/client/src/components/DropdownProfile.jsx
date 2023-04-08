@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import {toast, Toaster} from 'react-hot-toast'
 import Transition from '../utils/Transition';
 
 import UserAvatar from '../images/man.png';
@@ -12,6 +13,8 @@ function DropdownProfile({
 
   const trigger = useRef(null);
   const dropdown = useRef(null);
+
+  const Navigate = useNavigate();
 
   // close on click outside
   useEffect(() => {
@@ -33,6 +36,14 @@ function DropdownProfile({
     document.addEventListener('keydown', keyHandler);
     return () => document.removeEventListener('keydown', keyHandler);
   });
+
+  const onLogout = () => {
+    localStorage.removeItem("token")
+    toast.success("Logout success");
+    setTimeout(() => {
+      Navigate("/admin/login")
+    }, 2000)
+  }
 
   return (
     <div className="relative inline-flex">
@@ -82,13 +93,15 @@ function DropdownProfile({
               </Link>
             </li>
             <li>
-              <Link
+              <button
                 className="font-medium text-sm text-indigo-500 hover:text-indigo-600 flex items-center py-1 px-3"
-                to="/admin/login"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+                onClick={() => {
+                  setDropdownOpen(!dropdownOpen)
+                  onLogout()
+                }}
               >
                 Log Out
-              </Link>
+              </button>
             </li>
           </ul>
         </div>

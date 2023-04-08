@@ -1,9 +1,10 @@
 import React from 'react';
 import axios from "axios";
-import { useRef } from "react";
+
+import { useRef, useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import { Link, useNavigate } from 'react-router-dom';
-import Applogo from "../../assets/img/gamepedia-logo-3.png"
+import Applogo from "../../assets/img/gamepedia-logo-4.png"
 import Background from "../../assets//img/background.jpg"
 
 function Signin() {
@@ -11,24 +12,36 @@ function Signin() {
 	const password = useRef();
 	const Navigate = useNavigate();
 
+  // const [role, setRole] = useState('super admin')
+
 	let onLogin = async () => {
 		try {
-			
-			let data = await axios.post("http://localhost:8000/api/admin/login", {
+      console.log(email.current.value, password.current.value);
+			let response = await axios.post("http://localhost:8000/api/admin/login", {
 				email: email.current.value,
 				password: password.current.value,
 			});
-			localStorage.setItem("token", `${data.data.token}`);
+      console.log(response.data)
+      const token = response.data.data
+			localStorage.setItem("token", token);
 			toast.success("login success");
 			email.current.value = "";
 			password.current.value = "";
-			setTimeout(() => {
-				Navigate("/admin/dashboard");
-			}, 2000);
+
+      setTimeout(() => {
+        Navigate("/admin/dashboard")
+      }, 2000);
+
 		} catch (error) {
-			toast.error(error.response.data.message);
+			toast.error(error.message);
 		}
 	};
+
+  // const handleSelectRole = (event) => {
+  //   setRole(event.target.value)
+  //   console.log(role)
+  // }
+
   return (
     <main className="bg-white">
 
@@ -52,19 +65,19 @@ function Signin() {
               <h1 className="text-3xl text-slate-800 font-bold mb-6">Welcome back, Min! ✨</h1>
               
               {/* Form */}
-              <form>
+              <div>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
                     <input id="email" ref={email} className="form-input w-full" type="email" />
                   </div>
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="role">Your Role <span className="text-rose-500">*</span></label>
-                    <select id="role" className="form-select w-full">
-                      <option>Super Admin</option>
-                      <option>Branch Admin</option>
+                    <select id="role" onChange={handleSelectRole} className="form-select w-full">
+                      <option value={"super admin"}>Super Admin</option>
+                      <option value={"branch admin"}>Branch Admin</option>
                     </select>
-                  </div>
+                  </div> */}
                   <div>
                     <label className="block text-sm font-medium mb-1" htmlFor="password">Password</label>
                     <input id="password" ref={password} className="form-input w-full" type="password" autoComplete="on" />
@@ -74,10 +87,10 @@ function Signin() {
                   <div className="mr-1">
                     <Link className="text-sm underline hover:no-underline" to="/user/login">Not an admin?</Link>
                   </div>
-                  <button onClick={() => onLogin()} type="submit" className="btn bg-indigo-500 hover:bg-indigo-600 text-white ml-3">Sign In</button>
+                  <button onClick={() => onLogin()} className="btn bg-indigo-500 hover:bg-indigo-600 text-white ml-3">Sign In</button>
                 </div>
                 <Toaster />
-              </form>
+              </div>
 
               {/* Footer */}
               <div className="pt-5 mt-6 border-t border-slate-200">

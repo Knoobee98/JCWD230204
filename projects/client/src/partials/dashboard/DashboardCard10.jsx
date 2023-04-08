@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-has-content */
 import React from 'react';
 
 function DashboardCard10() {
@@ -38,7 +39,7 @@ function DashboardCard10() {
               </div>
               <div className="grow flex items-center border-b border-slate-100 text-sm py-2">
                 <div className="grow flex justify-between">
-                  <div className="self-center">Bachtiar<a className="font-medium text-slate-800" href="#0"></a> was removed by Fauzan as a branch admin Tangerang Selatan<a className="font-medium text-slate-800 hover:text-slate-900" href="#0"></a></div>
+                  <div className="self-center">Bachtiar<a className="font-medium text-slate-800" href="#0"/> was removed by Fauzan as a branch admin Tangerang Selatan<a className="font-medium text-slate-800 hover:text-slate-900" href="#0"></a></div>
                   <div className="shrink-0 self-end ml-2">
                     <a className="font-medium text-indigo-500 hover:text-indigo-600" href="#0">View<span className="hidden sm:inline"> -&gt;</span></a>
                   </div>

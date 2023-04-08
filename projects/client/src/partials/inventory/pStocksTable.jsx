@@ -5,6 +5,8 @@ import Image01 from '../../images/fauzan.png'
 import Image02 from '../../images/man.png'
 import Image03 from '../../images/woman.png'
 
+import axios from 'axios'
+
 function StocksTable({
   selectedItems
 }) {
@@ -141,10 +143,15 @@ function StocksTable({
       description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
     }
   ];
+  
 
   const [selectAll, setSelectAll] = useState(false);
   const [isCheck, setIsCheck] = useState([]);
   const [list, setList] = useState([]);
+
+  const getProductsStocks = async() => {
+    const response = await axios.get(``)
+  }
 
   useEffect(() => {
     setList(stocks);

@@ -20,6 +20,7 @@
     "flowbite": "^1.6.4",
     "flowbite-react": "^0.4.2",
     "json-server": "^0.17.1",
+    "jsonwebtoken": "^9.0.0",
     "moment": "^2.29.4",
     "nanoid": "^4.0.2",
     "react": "^18.2.0",

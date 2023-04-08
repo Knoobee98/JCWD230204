@@ -333,7 +333,7 @@ module.exports = {
 
       //set unique transaction id
       const transactionId = nanoid(13);
-      console.log(transactionId);
+      // console.log(transactionId);
 
       //create transaction
       const transaction = await Transaction.create(

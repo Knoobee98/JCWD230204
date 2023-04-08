@@ -26,12 +26,10 @@ import DashboardUsers from "./pages/user/dashboardUser";
 
 // adminside
 import LoginAdmin from "./pages/admin/loginadmin";
-import Logi from "./pages/admin/logi"
 import Dashboard from "./pages/admin/dashboard";
 import BranchDashboard from "./pages/admin/branchDashboard";
 import AdminManagement from "./pages/admin/adminList"
 import CreateAdmin from "./pages/admin/createadmin"
-import BranchRegister from "./pages/admin/branchregister";
 import ProductStocks from "./pages/admin/productStocks";
 import ProductList from "./pages/admin/productList"
 import ProductHistory from "./pages/admin/productHistory"
@@ -40,11 +38,6 @@ import Transactions from "./pages/admin/transactions"
 import CustomerTransactions from "./pages/admin/customers"
 import OrderTransactions from "./pages/admin/orders"
 import InvoicesTransactions from "./pages/admin/invoices"
-
-import Old from "./pages/admin/old"
-
-
-
 // static 404
 import NotFound from "./pages/notfound";
 
@@ -85,9 +78,7 @@ useEffect(() => {
         <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route path="/admin/branch/dashboard" element={<BranchDashboard/>} />
         <Route path="/admin/login" element={<LoginAdmin />} />
-        {/* <Route path="admin/logi" element={<Logi/>}/> */}
         <Route path="/admin/newadmin" element={<CreateAdmin/>}/>
-        {/* <Route path="/admin/branchRegister" element={<BranchRegister/>}/> */}
         <Route path="/admin/manager" element={<AdminManagement/>}/>
         <Route path="/admin/productStock" element={<ProductStocks/>}/>
         <Route path="/admin/productList" element={<ProductList/>}/>
@@ -97,13 +88,10 @@ useEffect(() => {
         <Route path="/admin/customers" element={<CustomerTransactions/>}/>
         <Route path="/admin/orders" element={<OrderTransactions/>}/>
         <Route path="/admin/invoices" element={<InvoicesTransactions/>}/>
-        {/* <Route path="/admin/old" element={<Old/>}/> */}
 
         <Route path="/notFound" element={<NotFound />} />
 
       </Routes>
-
-
       <Toaster/>
     </div>
   );
