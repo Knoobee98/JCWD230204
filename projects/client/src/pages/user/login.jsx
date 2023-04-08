@@ -168,11 +168,7 @@ export default function Login(){
                                 Login
                             </button>
                             
-<<<<<<< HEAD
                         <p className="mt-2 mb-0 pt-1 text-sm flex gap-2 font-semibold">
-=======
-                        <p className="mt-2 mb-0 pt-1 text-sm ">
->>>>>>> main
                             Don't have an account?
                             <a
                                 href="/user/register"

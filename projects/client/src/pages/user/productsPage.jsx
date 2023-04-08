@@ -1,19 +1,9 @@
 import { useNavigate} from 'react-router-dom'
 import axios from 'axios'
 import { useEffect, useState, useRef } from 'react'
-<<<<<<< HEAD
 import NavBar from '../../components/navbaruser';
 import HomeMenu from "../../components/homemenu";
 import Footer from '../../components/footer';
-=======
-import NavbarUser from "../../components/navbaruser";
-import HomeMenu from "../../components/homemenu";
-import Footer from "../../components/footer";
-
-// import imgprod from './../assets/img/assets_products/ps4.jpg'
-// import BannerVertical from './../assets/img/banner-vert-1.png'
-
->>>>>>> main
 
 export default function ProductPage(){
     const [products, setProducts] = useState([])
@@ -87,15 +77,10 @@ export default function ProductPage(){
 
     return(
         <>
-<<<<<<< HEAD
         <div className='bg-[#1c1c1c]'>
             <NavBar />
             <HomeMenu />
         </div>
-=======
-        <NavbarUser/>
-        <HomeMenu/>
->>>>>>> main
         <div className="flex gap-4 bg-[#1c1c1c] py-4">
             {/* sidebar nav */}
             <div className="w-[300px] p-4 flex flex-col gap-4 text-white ">
@@ -190,11 +175,7 @@ export default function ProductPage(){
                 </div>
             </div>  
         </div>
-<<<<<<< HEAD
         <Footer />
-=======
-        <Footer/>
->>>>>>> main
         </>
     )
 }

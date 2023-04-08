@@ -29,56 +29,57 @@ const handlebars = require('handlebars');
 
 module.exports = {
     loginsuperadmin: async(req, res) => {
-        // rollback
-        const t = await sequelize.transaction() 
         try {
 
             // step 1: ambil data dari req.body
             const { email, password} = req.body
 
             // step 2: validasi
-            // if(!username.length || !email.length || !password.length || !phone_number.length )
-            // return res.status(404).send({
-            //     isError: true,
-            //     message: 'Input is required',
-            //     data: null
-            // })
+            if(!email.length || !password.length)
+            return res.status(404).send({
+                isError: true,
+                message: 'Input is required',
+                data: null
+            })
         
             // step 3: check ke database, username & email nya exist
-            // let findEmail= await users.findOne({
-            //     where: {
-            //             email: email
-            //     }
-            // })
-            // if(findEmail)
-            //     return res.status(404).send({
-            //         isError: true,
-            //         message: 'email already exist',
-            //         data: null
-            //     })
-            //     console.log(findEmail)
+            let findEmail= await users.findOne({
+                where: {
+                        email: email
+                }
+            })
+            if(!findEmail)
+                return res.status(404).send({
+                    isError: true,
+                    message: 'email not exist',
+                    data: null
+                })
+                console.log(findEmail)
 
-            // step 4: simpan data ke database 
-            const resCreateUser = await admin.create({email, password: await hashPassword(password), role: 1}, {transaction: t})
+            // step 4: check password
+            if(password !== findEmail.password){
+                return res.status(404).send({
+                    isError: true,
+                    message: 'password wrong',
+                    data: null
+                })
+            }
 
             // step 5 : token            
-            // let token = createToken({
-            //     id: findEmail.dataValues.id,
-            //     username: findEmail.dataValues.username,
-            //     status: findEmail.dataValues.status,
-            // });
-
+            let token = createToken({
+                id: findEmail.dataValues.id,
+                username: findEmail.dataValues.username,
+                status: findEmail.dataValues.status,
+            });
 
             // step 6 : kirim response
-            await t.commit()
             res.status(201).send({
                 isError: false, 
                 message: 'Login Success', 
-                data: resCreateUser
+                data: token
             })
+
         } catch (error) {
-            await t.rollback()
-            console.log(error)
   
             res.status(404).send({
                 isError: true, 

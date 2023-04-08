@@ -1,17 +1,10 @@
 import axios from 'axios'
 import {useState, useEffect} from 'react'
 import {Link, useParams} from 'react-router-dom'
-<<<<<<< HEAD
 import {toast} from 'react-hot-toast'
 import NavBar from '../../components/navbaruser';
 import HomeMenu from "../../components/homemenu";
 import Footer from '../../components/footer';
-=======
-import {toast, Toaster} from 'react-hot-toast'
-import NavbarUser from "../../components/navbaruser";
-import HomeMenu from "../../components/homemenu";
-import Footer from "../../components/footer";
->>>>>>> main
 
 export default function ProductDetails(){
     const [category, setCategory] = useState([])
@@ -73,15 +66,10 @@ export default function ProductDetails(){
 
     return(
         <>
-<<<<<<< HEAD
         <div className='bg-[#1c1c1c]'>
             <NavBar />
             <HomeMenu />
         </div>
-=======
-        <NavbarUser/>
-        <HomeMenu/>
->>>>>>> main
         <div className="flex justify-center gap-4 py-4 bg-[#1c1c1c]">
         
             {/* products details */}
@@ -112,11 +100,7 @@ export default function ProductDetails(){
                 </div>
             </div>
         </div>
-<<<<<<< HEAD
         <Footer />
-=======
-        <Footer/>
->>>>>>> main
         </>
     )
 }

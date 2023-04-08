@@ -14,11 +14,11 @@ function Signin() {
 	let onLogin = async () => {
 		try {
 			
-			let data = await axios.post("http://localhost:8000/admin/login", {
+			let data = await axios.post("http://localhost:8000/api/admin/login", {
 				email: email.current.value,
 				password: password.current.value,
 			});
-			localStorage.setItem("token", `${data.data.data.token}`);
+			localStorage.setItem("token", `${data.data.token}`);
 			toast.success("login success");
 			email.current.value = "";
 			password.current.value = "";
