@@ -32,9 +32,13 @@ export default function CheckoutPage(){
 
     const getCart = async() => {
         try {
-            const response = await axios.get(process.env.REACT_APP_API_GET_CART)
-            console.log(response.data.data)
-            setSubtotal(response.data.totalBeforeDiscount)
+            const response = await axios.get(process.env.REACT_APP_API_GET_CART, {
+                headers: {
+                    token: localStorage.getItem('token')
+                }
+            })
+            console.log(response.data.data.totalAfterDiscount)
+            setSubtotal(response.data.totalAfterDiscount)
             console.log(subtotal)
             
         } catch (error) {
@@ -141,12 +145,15 @@ export default function CheckoutPage(){
 
     const handleServicesChange = (event) => {
         setOngkir(event.target.value)
+        setTotal(parseInt(subtotal) + parseInt(ongkir))
 
     }
 
     const handleProvinceChange = (event) => {
         setProvince(event.target.value)
     }
+
+    
 
     return(
         <>

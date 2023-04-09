@@ -63,10 +63,12 @@ module.exports = {
                 })
             }
 
+            
+
             // step 5 : token            
             let token = createToken({
                 id: findEmail.dataValues.id,
-                username: findEmail.dataValues.username,
+                username: findEmail.dataValues.email,
                 status: findEmail.dataValues.status,
             });
 
@@ -110,11 +112,18 @@ module.exports = {
                 data: null
             });
 
+            const createBranchAdmin = await admin.create({
+                email: email,
+                password: await hashPassword(password),
+                status: "branch admin"
+            })
+
             res.status(200).send({
                 isError: false, 
                 message: 'Register Success', 
-                data: {token}
+                data: null
                 });
+
         } catch (error) {
             res.status(404).send({
 				isError: true,
@@ -628,6 +637,28 @@ module.exports = {
 
         }
     },
+
+    checkStatus: async(req, res ) => {
+        const token = req.headers.token
+        const decodeToken = jwt.decode(token, {complete: true})
+        const adminId = decodeToken.payload.id
+        const status = decodeToken.payload.status
+        const username = decodeToken.payload.username
+        try {
+            res.status(200).send({
+                isError: false,
+                message: "Check Status Success",
+                data: {status, username}
+            })
+        } catch (error) {
+            res.status(400).send({
+                isError: true,
+                message: "Check Status Failed",
+                data: error.message
+            })
+            
+        }
+    }
 };
 
 

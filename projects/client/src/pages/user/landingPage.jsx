@@ -45,12 +45,6 @@ export default function LandingPage(){
             <Navbar className="w-screen"/>
             <HomeMenu className="w-screen"/>
         </div>
-        
-        <NavbarUser/>
-        <HomeMenu/>
-        <NavbarUser/>
-        <HomeMenu/>
-
         <div className='flex flex-col justify-center gap-3 px-6 pb-4 pt-4 bg-[#1c1c1c]'>
             
 
@@ -143,6 +137,7 @@ export default function LandingPage(){
                 </div>
             </div>
         </div>
+        <Footer/>
         </>
     )
 }
