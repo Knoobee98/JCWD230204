@@ -47,7 +47,7 @@ export default function TransactionList() {
                 headers: {token: localStorage.getItem('token')}
             })
         } catch (error) {
-            
+            console.log(error.message)
         }
     }
 

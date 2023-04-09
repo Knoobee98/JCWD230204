@@ -80,7 +80,7 @@ export default function LandingPage(){
                                 <div key={value.id} onClick={() => Navigate(`user/Details/${value.id}`)}>
                                 <div className="lg:h-[350px] lg:w-[200px] md:h-[200px] md:w-[500px] flex flex-col gap-3 border rounded-lg drop-shadow-lg">
                                     <div className="bg-stone-800 flex justify-center rounded-t-lg">
-                                        <img src={`http://localhost:8000/Public/products/${value.products_images[0].url}`} alt="" className="h-[250px] w-[200px] object-cover  rounded-t-lg"/>
+                                        <img src={`${process.env.REACT_APP_API_BASE_URL}/Public/products/${value.products_images[0].url}`} alt="" className="h-[250px] w-[200px] object-cover  rounded-t-lg"/>
                                     </div>
                                     <div className="flex gap-4 justify-center px-2">
                                         <h2 className="text-sm " key={index}>{value.products_name}</h2>
@@ -138,7 +138,7 @@ export default function LandingPage(){
                                     <div key={value.id} onClick={() => Navigate(`user/Details/${value.id}`)}>
                                     <div className="lg:h-[350px] lg:w-[200px] md:h-[200px] md:w-[500px] flex flex-col gap-3 border rounded-lg drop-shadow-lg">
                                         <div className="bg-stone-800 flex justify-center rounded-t-lg">
-                                            <img src={`http://localhost:8000/Public/products/${value.products_images[0].url}`} alt="" className="h-[250px] w-[200px] object-cover rounded-t-lg"/>
+                                            <img src={`${process.env.REACT_APP_API_BASE_URL}/Public/products/${value.products_images[0].url}`} alt="" className="h-[250px] w-[200px] object-cover rounded-t-lg"/>
                                         </div>
                                         <div className="flex  justify-center px-2">
                                             <h2 className="text-sm " key={index}>{value.products_name}</h2>
