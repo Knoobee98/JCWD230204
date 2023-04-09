@@ -299,78 +299,78 @@ module.exports = {
     const t = await sequelize.transaction();
 
     try {
-      // //get token from headers
-      // const token = req.headers.token;
-      // //decode token to obtain id user
-      // const decodedToken = jwt.decode(token, { complete: true });
-      // const id = decodedToken.payload.id;
+      //get token from headers
+      const token = req.headers.token;
+      //decode token to obtain id user
+      const decodedToken = jwt.decode(token, { complete: true });
+      const id = decodedToken.payload.id;
 
-      // //check user
-      // const findUser = await users.findOne({
-      //   where: { id },
-      // });
+      //check user
+      const findUser = await users.findOne({
+        where: { id },
+      });
 
-      // if (!findUser) {
-      //   res.status(400).send({
-      //     isError: true,
-      //     message: "user not found",
-      //     data: null,
-      //   });
-      // }
+      if (!findUser) {
+        res.status(400).send({
+          isError: true,
+          message: "user not found",
+          data: null,
+        });
+      }
 
-      // if (findUser.status === "unconfirmed") {
-      //   res.status(400).send({
-      //     isError: true,
-      //     message: "please confirm your email",
-      //     data: null,
-      //   });
-      // }
+      if (findUser.status === "unconfirmed") {
+        res.status(400).send({
+          isError: true,
+          message: "please confirm your email",
+          data: null,
+        });
+      }
 
-      // //set expired time
-      // const interval = 6300000; // 1.75 hours
-      // const currentTime = new Date();
-      // const expiredTime = new Date(currentTime.getTime() + interval);
+      //set expired time
+      const interval = 6300000; // 1.75 hours
+      const currentTime = new Date();
+      const expiredTime = new Date(currentTime.getTime() + interval);
 
-      // //set unique transaction id
-      // const transactionId = nanoid(13);
-      // // console.log(transactionId);
+      //set unique transaction id
+      const transactionId = nanoid(13);
+      // console.log(transactionId);
 
-      // //create transaction
-      // const transaction = await Transaction.create(
-      //   {
-      //     orderId: transactionId,
-      //     date: new Date(),
-      //     expiry_date: expiredTime,
-      //     user_id: id,
-      //     address: address,
-      //     city: city,
-      //     state: state,
-      //     postal_code: zip,
-      //     country: country,
-      //     shipping: shipping,
-      //     total: total,
-      //     transaction_status_id: 1,
-      //   },
-      //   { transaction: t }
-      // );
+      //create transaction
+      const transaction = await Transaction.create(
+        {
+          orderId: transactionId,
+          date: new Date(),
+          expiry_date: expiredTime,
+          user_id: id,
+          address: address,
+          city: city,
+          state: state,
+          postal_code: zip,
+          country: country,
+          shipping: shipping,
+          total: total,
+          transaction_status_id: 1,
+        },
+        { transaction: t }
+      );
 
-      // const cartItems = await cart.findAll({
-      //   where: { user_id: id },
-      //   attributes: ["id", "qty", "user_id"],
-      //   include: [
-      //     {
-      //       model: products,
-      //       attributes: ["id", "products_name"],
-      //       include: [
-      //         {
-      //           model: products_detail,
-      //           attributes: ["price"],
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // });
-      // console.log(cartItems[0].dataValues.product.dataValues.id);
+      const cartItems = await cart.findAll({
+        where: { user_id: id },
+        attributes: ["id", "qty", "user_id"],
+        include: [
+          {
+            model: products,
+            attributes: ["id", "products_name"],
+            include: [
+              {
+                model: products_detail,
+                attributes: ["price"],
+              },
+            ],
+          },
+        ],
+      });
+      console.log(cartItems[0].dataValues.product.dataValues.id);
 
       const userLocation = {
         lat: latitude,
@@ -378,44 +378,63 @@ module.exports = {
       }
 
       const findStores = await branchStores.findAll({
-        attributes: ["id", "latitude", "longitude", [
-          sequelize.literal(`(6371 * acos(cos(radians(${userLocation.lat})) * cos(radians(latitude)) * cos(radians(longitude) - radians(${userLocation.longitude})) + sin(radians(${userLocation.lat})) * sin(radians(latitude))))`),
+        attributes: ["id", "branch_name", "latitude", "longitude", "city", "province", [
+          sequelize.literal(`(6371 * acos(cos(radians(${userLocation.lat})) * cos(radians(latitude)) * cos(radians(longitude) - radians(${userLocation.lng})) + sin(radians(${userLocation.lat})) * sin(radians(latitude))))`),
           'distances'
         ]],
       })
+      const findClosestStore = () => {
+        let closestStores;
+        let secondClosestStores;
 
-      // //create transaction detail
-      // const transactionDetails = cartItems.map((item) => {
-      //   const product = item.dataValues.product?.dataValues;
-      //   return {
-      //     transaction_id: transaction.id,
-      //     product_name: product?.products_name || "",
-      //     qty: item.dataValues.qty,
-      //     price: product?.products_details?.[0]?.price || 0,
-      //   };
-      // });
-      // await TransactionDetail.bulkCreate(transactionDetails, {
-      //   transaction: t,
-      // });
+        findStores.forEach((store) => {
+          if (!closestStores) {
+            closestStores = store;
+          } else if (!secondClosestStores) {
+            secondClosestStores = store;
+          } else if (store.dataValues.distances < closestStores.dataValues.distances) {
+            secondClosestStores = closestStores;
+            closestStores = store;
+          } else if (store.dataValues.distances < secondClosestStores.dataValues.distances) {
+            secondClosestStores = store;
+          }
+        })
 
-      // //create transaction log
-      // await TransactionLog.create(
-      //   {
-      //     transaction_id: transaction.id,
-      //     transaction_status_id: 1,
-      //     date: new Date(),
-      //   },
-      //   { transaction: t }
-      // );
+        return [closestStores, secondClosestStores];
+      }
 
-      // //delete cart
-      // await cart.destroy({ where: { user_id: id } }, { transaction: t });
+      //create transaction detail
+      const transactionDetails = cartItems.map((item) => {
+        const product = item.dataValues.product?.dataValues;
+        return {
+          transaction_id: transaction.id,
+          product_name: product?.products_name || "",
+          qty: item.dataValues.qty,
+          price: product?.products_details?.[0]?.price || 0,
+        };
+      });
+      await TransactionDetail.bulkCreate(transactionDetails, {
+        transaction: t,
+      });
+
+      //create transaction log
+      await TransactionLog.create(
+        {
+          transaction_id: transaction.id,
+          transaction_status_id: 1,
+          date: new Date(),
+        },
+        { transaction: t }
+      );
+
+      //delete cart
+      await cart.destroy({ where: { user_id: id } }, { transaction: t });
 
       // await t.commit();
       res.status(200).send({
         isError: false,
         message: "place order success",
-        data: findStores,
+        data: {findStores, closestStores: findClosestStore()},
       });
     } catch (error) {
       // await t.rollback();

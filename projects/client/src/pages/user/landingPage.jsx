@@ -16,21 +16,36 @@ export default function LandingPage(){
     const Navigate = useNavigate()
 
     let getProducts = async() => {
-        let response = await axios.get(process.env.REACT_APP_API_GET_PRODUCTS);
-        console.log(response.data.data);
-        setProducts(response.data.data);
+        try {
+            let response = await axios.get(process.env.REACT_APP_API_GET_PRODUCTS);
+            console.log(response.data.data);
+            setProducts(response.data.data);
+        } catch (error) {
+            console.log(error.message);
+        }
+        
     }
 
     let getPromo = async() => {
-        let response = await axios.get(process.env.REACT_APP_API_GET_PROMO);
-        console.log(response.data.data);
-        setPromo(response.data.data);
+        try {
+            let response = await axios.get(process.env.REACT_APP_API_GET_PROMO);
+            console.log(response.data.data);
+            setPromo(response.data.data);
+        } catch (error) {
+            console.log(error.message);
+        }
+        
     }
 
     let getNewProducts = async() => {
-        let response = await axios.get(process.env.REACT_APP_API_GET_NEW_PRODUCTS);
-        console.log(response.data.data);
-        setNewProducts(response.data.data);
+        try {
+            let response = await axios.get(process.env.REACT_APP_API_GET_NEW_PRODUCTS);
+            console.log(response.data.data);
+            setNewProducts(response.data.data);
+        } catch (error) {
+            console.log(error.message);
+        }
+        
     }
 
     useEffect(() => {
