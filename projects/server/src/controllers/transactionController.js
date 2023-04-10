@@ -522,7 +522,7 @@ module.exports = {
       }
 
       // Your payment proof file path can be stored in a variable like this:
-      let paymentProofFilePath = req.files.images[0].path;
+      let paymentProofFilePath = `Public/images/${req.files.images[0].filename}`;
       console.log(req.files.images[0].path);
 
       let updatePaymentProof = await Transaction.update(
