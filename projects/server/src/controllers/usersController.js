@@ -18,8 +18,7 @@ const transporter = require('./../helpers/transport');
 const fs = require('fs').promises
 const handlebars = require('handlebars');
 const jwt = require('jsonwebtoken');
-
-
+const path = require("path");
 
 module.exports = {
     register: async(req, res) => {
@@ -62,10 +61,9 @@ module.exports = {
 
 
             // step 5 : kirim email
-            const template = await fs.readFile('C:/Users/OWNER/Desktop/Final Project Gamepedia/JCWD230204/projects/server/src/template/confirmation.html', 'utf-8')
-            console.log(template)
+            const template = await fs.readFile(path.resolve(__dirname, '../template/confirmation.html'), 'utf-8')
             const templateToCompile = handlebars.compile(template)
-            const newTemplate = templateToCompile({username:username, url: `http://localhost:3000/activation/${resCreateUser.id}`,})
+            const newTemplate = templateToCompile({username:username, url: `https://jcwd230204.purwadhikabootcamp.com/activation/${resCreateUser.id}`,})
                 
             await transporter.sendMail({
                 from: 'GAMEPEDIA',
@@ -221,13 +219,10 @@ module.exports = {
 
             const username = findEmail.dataValues.username;
 
-            const template = await fs.readFile(
-                './src/template/resetPassword.html',
-                "utf-8"
-            );
+            const template = await fs.readFile(path.resolve(__dirname, '../template/resetPassword.html'), 'utf-8')
             const templateToCompile = await handlebars.compile(template);
             const newTemplate = templateToCompile({
-                username, url: `http://localhost:3000/user/resetPassword/${findEmail.dataValues.id}`,
+                username, url: `https://jcwd230204.purwadhikabootcamp.com/user/resetPassword/${findEmail.dataValues.id}`,
             });
 
             await transporter.sendMail({
@@ -510,7 +505,7 @@ module.exports = {
                 })
             }
             
-            let ProfilePictPath = req.files.image[0].path
+            let ProfilePictPath = `Public/images/${req.files.images[0].filename}`
 
             let updateProfilePicture = await profiles.update({
                 profile_pic_url: ProfilePictPath
