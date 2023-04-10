@@ -14,6 +14,7 @@ const transactions_details = db.transactions_details;
 const stock_history = db.stock_history;
 const cart = db.carts;
 const users = db.users;
+const wishlist = db.wishlists;;
 
 const {Op} = require('sequelize');
 
@@ -558,4 +559,135 @@ module.exports = {
             })
         }
     },
+
+    addWishlist: async(req, res) => {
+        const {product_id} = req.query
+        const token = req.headers.token
+        const decodeToken = jwt.decode(token, {complete: true})
+        const userid = decodeToken.payload.id
+        
+        try {
+            const findUser = await users.findOne({
+                where: {
+                    id: userid
+                }
+            })
+
+            if(!findUser){
+                res.status(400).send({
+                    isError: true,
+                    message: "user not found",
+                    data: null
+                })
+            } 
+
+            if(findUser.status === "unconfirmed"){
+                res.status(400).send({
+                    isError: true,
+                    message: "user not confirmed, please confirmed your email",
+                    data: null
+                })
+            }
+
+            const findWishlist = await wishlist.findAll({
+                where: {
+                    user_id: userid
+                }
+            })
+
+            if(!findWishlist){
+                res.status(400).send({
+                    isError: true,
+                    message: "wishlist not found",
+                    data: {}
+                })
+            }
+
+            await wishlist.create({
+                product_id: product_id,
+                user_id: userid
+            })
+
+            res.status(200).send({
+                isError: false,
+                message: "add wishlist success",
+                data: null
+            })
+
+        } catch (error) {
+            res.status(500).send({
+                isError: true,
+                message: "add wishlist failed",
+                data: error.message
+            })
+        }
+    },
+
+    getWishlists: async(req, res) => {
+        const token = req.headers.token
+        const decodeToken = jwt.decode(token, {complete: true})
+        const userid = decodeToken.payload.id
+
+        try {
+            const findUser = await users.findOne({
+                where: {
+                    id: userid
+                }
+            })
+
+            if(!findUser){
+                res.status(400).send({
+                    isError: true,
+                    message: "user not found",
+                    data: null
+                })
+            }
+
+            const findWishlist = await wishlist.findAll({
+                include: [
+                    {models: products, attributes: ['products_name'],
+                include: [
+                    {models: products_detail, attributes: ['price']},
+                    {models: products_image, attributes: ['url']},
+                ]},
+                ],
+                where: {
+                    user_id: userid
+                }
+            })
+
+            if(!findWishlist){
+                res.status(400).send({
+                    isError: true,
+                    message: "wishlist not found",
+                    data: null
+                })
+            }
+
+            res.status(200).send({
+                isError: false,
+                message: "get wishlist success",
+                data: null
+            })
+            
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: "get wishlist failed",
+                data: error.message
+            })
+        }
+    },
+
+    deleteWishlist: async(req, res) => {
+        try {
+            
+        } catch (error) {
+            res.status(404).send({
+                isError: true,
+                message: "delete wishlist failed",
+                data: error.message
+            })
+        }
+    }
 }

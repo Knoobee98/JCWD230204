@@ -18,7 +18,7 @@ export default function Register (){
 
     const handleSubmit = async () => {
         try {
-            const {data}= await axios.post(process.env.REACT_APP_API_REGISTER, {username:name, email:email, password:password, phone_number:phone});
+            const data = await axios.post(process.env.REACT_APP_API_REGISTER, {username:name, email:email, password:password, phone_number:phone});
             console.log(data);
              toast.success (data.message)
              setTimeout(()=> {
@@ -51,7 +51,7 @@ export default function Register (){
                     <div className=" bg-zinc-200 shadow-lg rounded-lg p-10 flex flex-col gap-3 justify-center align-center items-center">
                     <h2 className="font-semibold ">REGISTER NOW</h2>
 
-                <form>
+                <div>
                     <div className="bg-zinc-100 rounded-lg relative mb-3"data-te-input-wrapper-init>
                         <input
                             type="text"
@@ -177,7 +177,7 @@ export default function Register (){
 
                      <div className="text-center lg:text-left">
                             <button
-                                onClick={()=>handleSubmit()} 
+                                onClick={handleSubmit} 
                                 type="button"
                                 className="inline-block rounded bg-primary px-7 pt-3 pb-2.5 text-sm font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]"
                                 data-te-ripple-init
@@ -193,7 +193,7 @@ export default function Register (){
                         </p>
                     </div>
                     <Toaster />
-                </form>
+                </div>
                 </div>
                 </div>
                 

@@ -28,7 +28,7 @@ export default function ResetPassword (){
 			setDisabled(true);
 
 			let { data } = await axios.patch(
-				"http://localhost:8000/users/resetPassword/id",
+				"http://localhost:8000/api/users/resetPassword/id",
 				{ id: location.pathname.slice(16), password: password.current.value, confirmPassword: confirmPassword.current.value }
 			);
 

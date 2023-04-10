@@ -89,7 +89,7 @@ useEffect(() => {
         <Route path="/admin/orders" element={<OrderTransactions/>}/>
         <Route path="/admin/invoices" element={<InvoicesTransactions/>}/>
 
-        <Route path="/notFound" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
       <Toaster/>

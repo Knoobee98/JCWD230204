@@ -20,6 +20,9 @@ module.exports = (sequelize, DataTypes) => {
       }),
       users.hasOne(models.profiles, {
         foreignKey: 'user_id',
+      }),
+      users.hasOne(models.wishlists, {
+        foreignKey: 'user_id',
       })
     }
   }

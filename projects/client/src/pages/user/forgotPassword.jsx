@@ -17,16 +17,17 @@ export default function ForgotPassword(){
 	let onForgotPassword = async () => {
 		try {
 			setDisabled(true);
-			let { data } = await axios.post("http://localhost:8000/users/forgot-password",
+			let response = await axios.post(`http://localhost:8000/api/users/forgot-password`,
 				{ email: email.current.value }
 			);
-			toast.success(data.message);
+			toast.success(response.data.message);
 			email.current.value = "";
 			setTimeout(() => {
 				Navigate('/login');
 			}, 3000);
 		} catch (error) {
-			toast.error(error.response.data.message);
+			console.log(error.message)
+			toast.error(error.message);
 		} finally {
 			setDisabled(false);
 		}
@@ -53,7 +54,7 @@ export default function ForgotPassword(){
                     
                     <h2 className="font-semibold text-2x1 tracking-wide text-center">FORGOT PASSWORD</h2>
 
-                        <form>
+                        <div>
                         <label 
                             htmlFor="email"
                             className="text-sm font-medium cursor-pointer mr-5">
@@ -70,7 +71,7 @@ export default function ForgotPassword(){
                             name="email" 
                             required />{" "}
                         <br />
-                        </form>
+                        </div>
 
 						<button
 							onClick={() => onForgotPassword ()}
