@@ -1,5 +1,6 @@
 // import Sequelize
 const {sequelize} = require('./../models');
+const path = require("path");
 
 // to generate uuid
 const { v4: uuidv4 } = require('uuid')
@@ -398,7 +399,7 @@ module.exports = {
                 })
             }
             console.log(req.files)
-            const productImagePath = req.files.images[0].path
+            const productImagePath = `Public/images/${req.files.images[0].filename}`
             console.log(productImagePath)
 
             const uploadProductImage = await productsImage.update({
