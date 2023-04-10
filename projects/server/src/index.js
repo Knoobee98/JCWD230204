@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { join } = require("path");
+const path = require("path");
 
 const PORT = process.env.PORT;
 const app = express();
@@ -19,6 +20,8 @@ app.use('/api/rajaOngkir', rajaOngkirAPIRouter);
 app.use('/api/openCage', openCageRouter)
 
 // NOTE : Add your routes here
+
+app.use('/Public', express.static(path.join(__dirname, '/Public')))
 
 app.get("/api", (req, res) => {
   res.send(`Hello, this is my API`);
