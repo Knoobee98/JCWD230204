@@ -33,7 +33,7 @@ export default function ChangePassword (){
 			setDisabled(true);
 
 			let data = await axios.patch(
-				"http://localhost:8000/users/change-password/",
+				`${process.env.REACT_APP_API_BASE_URL}/users/change-password/`,
 				{ id: location.pathname.slice(16), password: password.current.value, newPassword: newPassword.current.value, confirmPassword: confirmPassword.current.value },
                 { headers: {
                     token: localStorage.getItem("token"),

@@ -13,7 +13,6 @@ import Footer from '../../components/footer';
 export default function DashboardUser(){
 
     const Navigate = useNavigate()
-
     const [select, setSelect] = useState('')
 
     const onLogout = () => {
@@ -51,7 +50,8 @@ export default function DashboardUser(){
                     <button onClick={onLogout} className="flex gap-3 items-center">Logout <MdLogout/> </button>
                 </div>
             </div>
-            <div className="w-[900px] h-[700px] border my-4 p-4 rounded-r-xl bg-white">
+
+            <div className="w-[900px] border my-4 p-4 rounded-r-xl bg-white">
                 {/* content */}
                 {
                     select === "Transaction" ? (<TransactionList />) : 

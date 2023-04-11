@@ -28,7 +28,7 @@ export default function ResetPassword (){
 			setDisabled(true);
 
 			let { data } = await axios.patch(
-				"http://localhost:8000/api/users/resetPassword/id",
+				`${process.env.REACT_APP_API_BASE_URL}/api/users/resetPassword/id`,
 				{ id: location.pathname.slice(16), password: password.current.value, confirmPassword: confirmPassword.current.value }
 			);
 
@@ -87,7 +87,7 @@ export default function ResetPassword (){
 
                     <h2 className="font-semibold text-2x1 tracking-wide text-center">RESET PASSWORD</h2>
 
-                        <form>
+                        <div>
                         <label 
                             htmlFor="password"
                             className="text-sm font-medium cursor-pointer mr-5">
@@ -154,7 +154,7 @@ export default function ResetPassword (){
 								)}
 							</div>
                         <br />
-                        </form>
+                        </div>
 
 						<button
 							onClick={() => onResetPassword ()}

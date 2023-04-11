@@ -4,6 +4,7 @@ require('dotenv').config();
 module.exports = {
     getCity: async(req,res) => {
         try {
+            console.log(process.env.RAJAONGKIR_API_KEY)
             const response = await axios.get('https://api.rajaongkir.com/starter/city', {
                 headers: {
                     key: process.env.RAJAONGKIR_API_KEY,

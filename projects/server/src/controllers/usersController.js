@@ -64,7 +64,7 @@ module.exports = {
             const template = await fs.readFile(path.resolve(__dirname, '../template/confirmation.html'), 'utf-8')
             const templateToCompile = handlebars.compile(template)
             const newTemplate = templateToCompile({username:username, url: `https://jcwd230204.purwadhikabootcamp.com/activation/${resCreateUser.id}`,})
-                
+     
             await transporter.sendMail({
                 from: 'GAMEPEDIA',
                 to: email,

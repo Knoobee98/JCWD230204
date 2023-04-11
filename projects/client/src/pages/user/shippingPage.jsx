@@ -37,7 +37,7 @@ export default function CheckoutPage(){
                     token: localStorage.getItem('token')
                 }
             })
-            console.log(response.data.data.totalAfterDiscount)
+            // console.log(response.data.data.totalAfterDiscount)
             setSubtotal(response.data.totalAfterDiscount)
             console.log(subtotal)
             
@@ -145,7 +145,7 @@ export default function CheckoutPage(){
 
     const handleServicesChange = (event) => {
         setOngkir(event.target.value)
-        setTotal(parseInt(subtotal) + parseInt(ongkir))
+        setTotal(subtotal + parseInt(ongkir))
 
     }
 

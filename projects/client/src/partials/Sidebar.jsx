@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import { NavLink, useLocation } from 'react-router-dom';
 import Applogo from "./../assets/img/gamepedia-logo-3.png"
 import SidebarLinkGroup from './SidebarLinkGroup';
@@ -16,6 +18,17 @@ function Sidebar({
 
   const storedSidebarExpanded = localStorage.getItem('sidebar-expanded');
   const [sidebarExpanded, setSidebarExpanded] = useState(storedSidebarExpanded === null ? false : storedSidebarExpanded === 'true');
+
+  const Navigate = useNavigate();
+
+  const onLogout = () => {
+    localStorage.removeItem('token');
+    setTimeout(() => {
+      Navigate('/admin/login');
+      toast.success('logout success')
+    }, 2000)
+
+  }
 
   // close on click outside
   useEffect(() => {
@@ -374,8 +387,6 @@ function Sidebar({
               {/* Log Out */}
               <li className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${pathname.includes('campaigns') && 'bg-[#0E112B]'}`}>
                 <NavLink
-                  end
-                  to="/admin/login"
                   className={`block text-slate-200 hover:text-white truncate transition duration-150 ${
                     pathname.includes('campaigns') && 'hover:text-slate-200'
                   }`}
@@ -385,7 +396,7 @@ function Sidebar({
                             <path className="fill-current text-slate-600" d="M8.07 16H10V8H8.07a8 8 0 110 8z" />
                             <path className="fill-current text-slate-400" d="M15 12L8 6v5H0v2h8v5z" />
                       </svg>
-                    <span className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
+                    <span onClick={() => onLogout()} className="text-sm font-medium ml-3 lg:opacity-0 lg:sidebar-expanded:opacity-100 2xl:opacity-100 duration-200">
                       Log Out
                     </span>
                   </div>

@@ -17,7 +17,7 @@ export default function ForgotPassword(){
 	let onForgotPassword = async () => {
 		try {
 			setDisabled(true);
-			let response = await axios.post(`http://localhost:8000/api/users/forgot-password`,
+			let response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/users/forgot-password`,
 				{ email: email.current.value }
 			);
 			toast.success(response.data.message);
