@@ -44,7 +44,7 @@ export default function ChangePassword (){
 			newPassword.current.value = ''
 			confirmPassword.current.value = ''
 			setTimeout(() => {
-				Navigate("/login");
+				Navigate("/user/login");
 			}, 3000);
 		} catch (error) {
 			toast.error(error.response.data.message);

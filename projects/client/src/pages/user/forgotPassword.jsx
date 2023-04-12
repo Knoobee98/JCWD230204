@@ -23,7 +23,7 @@ export default function ForgotPassword(){
 			toast.success(response.data.message);
 			email.current.value = "";
 			setTimeout(() => {
-				Navigate('/login');
+				Navigate('/user/login');
 			}, 3000);
 		} catch (error) {
 			console.log(error.message)

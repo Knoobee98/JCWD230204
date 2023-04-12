@@ -306,7 +306,7 @@ module.exports = {
 
     changePassword: async (req, res) => {
         try {
-            let {password, newPassword, confirmPassword} = req.body;
+            let { password, newPassword, confirmPassword} = req.body;
             let {id} = req.uid;
 
             let findUser = await users.findOne({

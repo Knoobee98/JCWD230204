@@ -29,18 +29,19 @@ export default function ResetPassword (){
 
 			let { data } = await axios.patch(
 				`${process.env.REACT_APP_API_BASE_URL}/api/users/resetPassword/id`,
-				{ id: location.pathname.slice(16), password: password.current.value, confirmPassword: confirmPassword.current.value }
+
+				{ id: location.pathname.slice(33), password: password.current.value, confirmPassword: confirmPassword.current.value }
 			);
 
-			toast.success(data.message);
+			toast.success(data.data.message);
 			password.current.value = ''
 			confirmPassword.current.value = ''
 
 			setTimeout(() => {
-				Navigate("/login");
+				Navigate("/user/login");
 			}, 3000);
-		} catch (error) {
-			toast.error(error.response.data.message);
+		} catch (data) {
+			toast.error(data.data.message);
 		} finally {
 			setDisabled(false);
 		}
