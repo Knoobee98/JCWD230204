@@ -54,9 +54,9 @@ module.exports = {
 
             // step 4: simpan data ke database 
             const resCreateUser = await users.create({id: uuidv4(), username, email, password: await hashPassword(password), phone_number, status: 'unconfirmed'}, {transaction: t})
-
+            
             const resCreateProfile = await profiles.create({
-                users_id: resCreateUser.id
+                user_id: resCreateUser.id
             }, {transaction: t})
 
 
