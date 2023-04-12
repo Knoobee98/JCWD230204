@@ -544,13 +544,14 @@ module.exports = {
       const id = decodedToken.payload.id;
 
       const { transaction_id } = req.params;
+      console.log(transaction_id)
 
       const findUser = await users.findOne({
         where: { id },
       });
 
       if (!findUser) {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "user not found",
           data: null,
@@ -558,11 +559,11 @@ module.exports = {
       }
 
       const findTransaction = await Transaction.findOne({
-        where: [{ user_id: id }, { id: transaction_id }],
+        where: [{ user_id: id , id: transaction_id }],
       });
 
       if (!findTransaction) {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "transaction not found",
           data: null,
