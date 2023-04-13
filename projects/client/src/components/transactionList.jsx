@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
+import moment from 'moment';
 
 
 export default function TransactionList() {
@@ -23,7 +24,7 @@ export default function TransactionList() {
                     token: localStorage.getItem('token')
                 }
             })
-            console.log(response.data.data[0].id)
+            console.log(response.data.data)
             setTransactionList(response.data.data)
             //paginations
             
@@ -88,6 +89,8 @@ export default function TransactionList() {
     const filterHandlerByDate = async() => {
         try {
             console.log(startDate, endDate)
+            moment(startDate).format('YYYY-MM-DD')
+            moment(endDate).format('YYYY-MM-DD')
             const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/get?filterBy=${filterBy}&startDate=${startDate}&endDate=${endDate}`, {
                 headers: {
                     token: localStorage.getItem('token')
@@ -137,7 +140,7 @@ export default function TransactionList() {
                             <input type="date" onChange={(e) => {setEndDate(e.target.value)}} value={endDate}/>
                             </div>
                             <div>
-                                <button onClick={() => filterHandlerByDate}>Search</button>
+                                <button onClick={() => filterHandlerByDate()}>Search</button>
                             </div>
                             </>
                         
@@ -147,7 +150,7 @@ export default function TransactionList() {
                                 <input ref={search} type="text" placeholder='search'/>
                             </div>
                             <div>
-                                <button onClick={() => filterHandler}>Search</button>
+                                <button onClick={() => filterHandler()}>Search</button>
                             </div>
                             </>
                         )

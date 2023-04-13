@@ -46,14 +46,14 @@ export default function Profile() {
                     </>
                 )
             }
-                <div>{profile.user.username}</div>
+                <div>{profile ? profile.user.username : "username"}</div>
             </div>
             <div className='p-4'>
-                <div>name : {profile.name}</div>
-                <div>gender: {profile.gender}</div>
-                <div>birthdate : {profile.birthdate.slice(0, 10)}</div>
-                <div>email : {profile.user.email}</div>
-                <div>phone : {profile.user.phone_number}</div>
+                <div>name : {profile ? profile.name : "john doe"}</div>
+                <div>gender: {profile? profile.gender: "male"}</div>
+                <div>birthdate : {profile && profile.birthdate ? profile.birthdate.slice(0, 10) : "1992-02-11"}</div>
+                <div>email : {profile ? profile.user.email : "john.doe@gmail.com"}</div>
+                <div>phone : {profile ? profile.user.phone_number : "1234567890"}</div>
                 <div>address</div>
             </div>
         </div>

@@ -384,7 +384,7 @@ module.exports = {
 
             //check user
             if(!findUser){
-                res.status(400).send({
+                return res.status(400).send({
                     isError: true,
                     message: "user not found",
                     data: {}
@@ -392,7 +392,7 @@ module.exports = {
             }
 
             if(findUser.status === "unconfirmed"){
-                res.status(400).send({
+                return res.status(400).send({
                     isError: true,
                     message: "user not confirmed, please confirmed your email",
                     data: null

@@ -84,11 +84,12 @@ module.exports = {
             date: {
               [Op.between]: [startDate, endDate],
             },
+            user_id: id
           },
           order: [["date", "ASC"]],
         });
       } else if (filterBy === "orderStatus") {
-        findTransaction = await Transactions.findAll({
+        findTransaction = await Transaction.findAll({
           attributes: [
             "id",
             "date",
@@ -117,6 +118,9 @@ module.exports = {
               },
             },
           ],
+          where: {
+            user_id: id
+          },
           order: [["date", "DESC"]],
         });
       } else if (filterBy === "invoice") {
@@ -148,6 +152,7 @@ module.exports = {
             id: {
               [Op.like]: `%${query}%`,
             },
+            user_id: id
           },
           order: [["date", "DESC"]],
         });
@@ -179,6 +184,9 @@ module.exports = {
               attributes: ["status_name"],
             },
           ],
+          where: {
+            user_id: id
+          },
           order: [["id", "ASC"]],
         });
       } else if (sortBy === "orderID" && sortType === "desc") {
@@ -206,6 +214,9 @@ module.exports = {
               attributes: ["status_name"],
             },
           ],
+          where: {
+            user_id: id
+          },
           order: [["id", "DESC"]],
         });
       } else if (sortBy === "date" && sortType === "asc") {
@@ -233,6 +244,7 @@ module.exports = {
               attributes: ["status_name"],
             },
           ],
+          where: {user_id: id},
           order: [["date", "ASC"]],
         });
       } else if (sortBy === "date" && sortType === "desc") {
@@ -260,6 +272,7 @@ module.exports = {
               attributes: ["status_name"],
             },
           ],
+          where: {user_id: id},
           order: [["date", "DESC"]],
         });
       }
@@ -313,7 +326,7 @@ module.exports = {
       });
 
       if (!findUser) {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "user not found",
           data: null,
@@ -321,7 +334,7 @@ module.exports = {
       }
 
       if (findUser.status === "unconfirmed") {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "please confirm your email",
           data: null,

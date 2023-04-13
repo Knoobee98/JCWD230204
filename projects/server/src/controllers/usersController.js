@@ -399,7 +399,10 @@ module.exports = {
                       'phone_number'
                     ]
                   }
-                ]
+                ],
+                where: {
+                    user_id: id
+                }
               })
               
             if(!findProfile){
