@@ -48,12 +48,15 @@ export default function ProductDetails(){
             console.log(quantity)
             const token = localStorage.getItem("token")
             const url = process.env.REACT_APP_API_ADD_TO_CART.replace(":id", id).replace(":quantity", parseInt(quantity));
-            await axios.get(url, {
+            const response = await axios.get(url, {
                 headers: { token }
             })
-            toast.success('Product added to cart')
-        } catch (error) {
-            console.log(error.message)
+            // console.log(response.data)
+            toast.success(response.response.data.message)
+        } catch (response) {
+            // console.log(response.data.message)
+            // console.log(response.response.data.message)
+            toast.error(response.response.data.message)
         }
         
         
