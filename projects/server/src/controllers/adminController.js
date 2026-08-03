@@ -56,7 +56,12 @@ module.exports = {
                 })
 
             // step 4: check password
-            if(password !== findEmail.password){
+            const storedPassword = findEmail.password;
+            const passwordMatch = storedPassword.startsWith('$2')
+                ? await hashMatch(password, storedPassword)
+                : password === storedPassword;
+
+            if(!passwordMatch){
                 return res.status(404).send({
                     isError: true,
                     message: 'password is wrong',
@@ -70,7 +75,7 @@ module.exports = {
             let token = createToken({
                 id: findEmail.dataValues.id,
                 username: findEmail.dataValues.email,
-                status: findEmail.dataValues.status,
+                status: findEmail.dataValues.role,
             });
 
             // step 6 : kirim response
@@ -116,7 +121,7 @@ module.exports = {
             const createBranchAdmin = await admin.create({
                 email: email,
                 password: await hashPassword(password),
-                status: "branch admin"
+                role: "branch admin"
             })
 
             res.status(200).send({
@@ -167,14 +172,14 @@ module.exports = {
 
         try {
             
-            const findTransactionStatus = await transaction.findAll({
+            const findTransactionStatus = await transaction.findOne({
                 where: {
                     id: transactionId
                 }
             })
 
             if(!findTransactionStatus){
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "Transaction Not Found",
                     data: null,
@@ -182,16 +187,22 @@ module.exports = {
             }
 
             if(transactionStatus === "Confirm Payment"){
-                const updateTransactionStatus = await transaction.update({
+                await transaction.update({
                     transaction_status_id: 3,
+                }, {
+                    where: { id: transactionId }
                 })
             } else if(transactionStatus === "delivery"){
-                const updateTransactionStatus = await transaction.update({
+                await transaction.update({
                     transaction_status_id: 4,
+                }, {
+                    where: { id: transactionId }
                 })
             } else if(transactionStatus === "cancel"){
-                const updateTransactionStatus = await transaction.update({
+                await transaction.update({
                     transaction_status_id: 6,
+                }, {
+                    where: { id: transactionId }
                 })
             }
 
@@ -221,11 +232,11 @@ module.exports = {
                     },
                     {
                         model: productsImage,
-                        attributes: ['image']
+                        attributes: ['url']
                     },
                     {
                         model: categoryProducts,
-                        attributes: ['category_name']
+                        attributes: ['category']
                     },
                     {
                         model: branchProducts,
@@ -312,8 +323,6 @@ module.exports = {
         const t = await sequelize.transaction()
         try {
             const { product_name, product_desc, product_category, product_price, product_stock, branch_id } = req.body;
-            //get admin id
-            const {admin_id} = req.params.admin_id;
 
             const createProductCategory = await categoryProducts.create({
                 category: product_category,
@@ -326,8 +335,8 @@ module.exports = {
 
             const createProductDetail = await productsDetail.create({
                 product_id: createProduct.id,
-                product_price: product_price,
-                product_desc: product_desc,
+                price: product_price,
+                desc: product_desc,
             }, {transaction: t})
 
             const createProductStock = await branchProducts.create({
@@ -363,28 +372,28 @@ module.exports = {
         const {product_id} = req.body
         try {
             const findAdmin = await admin.findOne({
-                where: [
-                    {id: admin_id},
-                    {status: "branch admin"}
-                ]
+                where: {
+                    id: admin_id,
+                    role: "branch admin"
+                }
             })
 
             if(!findAdmin){
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "Admin Not Found",
                     data: null,
                 })
             }
 
-            const findProduct = await products.findAll({
+            const findProduct = await products.findOne({
                 where: {
                     id: product_id
                 }
             })
 
             if(!findProduct){
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "Product Not Found",
                     data: null,
@@ -392,14 +401,14 @@ module.exports = {
             }
 
             if(!req.files){
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "Image Not Found",
                     data: null,
                 })
             }
             console.log(req.files)
-            const productImagePath = `Public/images/${req.files.images[0].filename}`
+            const productImagePath = `Public/images/${req.files.products_images[0].filename}`
             console.log(productImagePath)
 
             const uploadProductImage = await productsImage.update({
@@ -432,8 +441,6 @@ module.exports = {
         const t = await sequelize.transaction()
         try {
             const {product_id, product_name, product_category, product_price, product_desc, product_stock} = req.body;
-            //get admin id
-            const {admin_id} = req.params.admin_id;
 
             const findProduct = await products.findOne({
                 where: {
@@ -442,7 +449,7 @@ module.exports = {
             })
 
             if(!findProduct){
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "Product not found",
                     data: null,
@@ -461,7 +468,7 @@ module.exports = {
                 category: product_category
             }, {
                 where: {
-                    id: updateProduct.category_id
+                    id: findProduct.category_id
                 }
             }, {transaction: t})
 
@@ -484,14 +491,12 @@ module.exports = {
                 }
             }, {transaction: t})
 
-            const stockRemaining = updateProductStock.stock - product_stock
-
             const updateStockHistory = await stockHistory.create({
                 product_id: product_id,
                 event_type: 'admin change stock',
                 event_date: new Date(),
                 quantity_changed: product_stock,
-                quantity_remaining: stockRemaining,
+                quantity_remaining: product_stock,
             }, {transaction: t})
 
             await t.commit();
@@ -518,14 +523,14 @@ module.exports = {
         try {
             const {product_id} = req.body;
 
-            const findProduct = await products.findAll({
+            const findProduct = await products.findOne({
                 where: {
                     id: product_id
                 }
             })
 
             if(!findProduct){
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "Product not found",
                     data: null,
@@ -533,8 +538,7 @@ module.exports = {
             }
 
             const deleteProduct = await products.destroy({
-                where: { product_id },
-                cascade: true,
+                where: { id: product_id },
                 transaction: t
             })
 
@@ -640,11 +644,9 @@ module.exports = {
     },
 
     checkStatus: async(req, res ) => {
-        const token = req.headers.token
-        const decodeToken = jwt.decode(token, {complete: true})
-        const adminId = decodeToken.payload.id
-        const status = decodeToken.payload.status
-        const username = decodeToken.payload.username
+        const adminId = req.uid.id
+        const status = req.uid.status
+        const username = req.uid.username
         try {
             res.status(200).send({
                 isError: false,

@@ -5,10 +5,9 @@ const uploadPaymentImage = (req,res,next) => {
     const multerResult = multerUpload.fields([{name: 'images'}])
     multerResult(req,res, function(err){
         try {
-            console.log('masuk upload')
             if(err) throw err
             req.files.images.forEach((value) => {
-                if(value.size > 100000000000) throw {message: 'file size is too large' }
+                if(value.size > 5000000) throw {message: 'file size is too large' }
             })
             next()
         } catch (error) {
@@ -26,8 +25,8 @@ const multerResult = multerUpload.fields([{name: 'products_images'}])
 multerResult(req, res, function(err){
     try {
         if(err) throw err
-        req.files.products.forEach((value) => {
-            if(value.size > 100000000000) throw {message: 'file size is too large' }
+        req.files.products_images.forEach((value) => {
+            if(value.size > 5000000) throw {message: 'file size is too large' }
         })
         next()
     } catch(error){
@@ -45,6 +44,9 @@ const uploadProfilePicture = (req, res, next) => {
     multerResult(req, res, function (err) {
       try {
         if (err) throw err
+        if (!req.files || !req.files.profile_picture) {
+          throw { message: 'profile picture is required' }
+        }
         req.profilePicture = req.files.profile_picture[0]
         next()
       } catch (error) {

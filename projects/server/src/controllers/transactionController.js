@@ -14,7 +14,6 @@ const branchProducts = db.branch_products;
 const branchStores = db.branch_store;
 const discount = db.discounts;
 
-const jwt = require("jsonwebtoken");
 const { nanoid } = require("nanoid");
 const geolib = require("geolib");
 const path = require("path");
@@ -22,9 +21,7 @@ const path = require("path");
 module.exports = {
   getTransaction: async (req, res) => {
     const { sortBy, sortType, filterBy, startDate, endDate, query } = req.query;
-    const token = req.headers.token;
-    const decodedToken = jwt.decode(token, { complete: true });
-    const id = decodedToken.payload.id;
+    const id = req.uid.id;
     let findTransaction;
     try {
       const findUser = await users.findOne({
@@ -314,11 +311,7 @@ module.exports = {
     const t = await sequelize.transaction();
 
     try {
-      //get token from headers
-      const token = req.headers.token;
-      //decode token to obtain id user
-      const decodedToken = jwt.decode(token, { complete: true });
-      const id = decodedToken.payload.id;
+      const id = req.uid.id;
 
       //check user
       const findUser = await users.findOne({
@@ -350,70 +343,6 @@ module.exports = {
       const transactionId = nanoid(13);
       // console.log(transactionId);
 
-      //create transaction
-      const transaction = await Transaction.create(
-        {
-          orderId: transactionId,
-          date: new Date(),
-          expiry_date: expiredTime,
-          user_id: id,
-          address: address,
-          city: city,
-          state: state,
-          postal_code: zip,
-          country: country,
-          shipping: shipping,
-          total: total,
-          transaction_status_id: 1,
-        },
-        { transaction: t }
-      );
-
-      const cartItems = await cart.findAll({
-        where: { user_id: id },
-        attributes: ["id", "qty", "user_id"],
-        include: [
-          {
-            model: products,
-            attributes: ["id", "products_name"],
-            include: [
-              {
-                model: products_detail,
-                attributes: ["price"],
-              },
-            ],
-          },
-        ],
-      });
-
-      console.log(cartItems[0]);
-
-      //create transaction detail
-      const transactionDetails = cartItems.map((item) => {
-        const product = item.dataValues.product?.dataValues;
-        return {
-          transaction_id: transaction.id,
-          product_name: product?.products_name || "",
-          qty: item.dataValues.qty,
-          price: product?.products_details?.[0]?.price || 0,
-        };
-      });
-      await TransactionDetail.bulkCreate(transactionDetails, {
-        transaction: t,
-      });
-
-      //create transaction log
-      await TransactionLog.create(
-        {
-          transaction_id: transaction.id,
-          transaction_status_id: 1,
-          date: new Date(),
-        },
-        { transaction: t }
-      );
-
-      console.log(cartItems[0].dataValues.product.dataValues.id);
-      
       const userLocation = {
         lat: latitude,
         lng: longitude,
@@ -437,9 +366,8 @@ module.exports = {
         order: [[sequelize.col('distances'), 'ASC']],
         limit: 3
       });
-      console.log(findStores[0].dataValues.id)
 
-      if(findStores){
+      if(findStores.length > 0){
         const storeId = findStores[0].dataValues.id;
 
         console.log(id, storeId)
@@ -481,14 +409,13 @@ module.exports = {
               event_date: new Date(),
               quantity_changed: cartItem.qty,
               remaining_quantity: newStock,
-              product_id: cartItem.product_id,
+              product_id: cartItem.product.id,
             }, { transaction: t });
           }
         }
 
         //create transaction
         const transaction = await Transaction.create({
-          transaction_id: transactionId,
           date: new Date(),
           expiry_date: expiredTime,
           address,
@@ -512,16 +439,15 @@ module.exports = {
 
         // Create TransactionDetail for each item in the cart
         for (const cartItem of cartItems) {
-          console.log(cartItem.dataValues.product.dataValues.products_details[0].dataValues.price)
           const transactionDetail = await TransactionDetail.create({
-            product_name: cartItem.product.products_name,
+            product_name: cartItem.dataValues.product.dataValues.products_name,
             qty: cartItem.qty,
             total_price: cartItem.dataValues.product.dataValues.products_details[0].dataValues.price * cartItem.qty,
             transaction_id: transaction.id
           }, { transaction: t });
         }
 
-        console.log('Stock updated and StockHistory created for closest store:', findStores.branch_name);
+        console.log('Stock updated and StockHistory created for closest store:', findStores[0].dataValues.branch_name);
         console.log('TransactionLog and TransactionDetails created for the entire transaction');
 
       } else {
@@ -551,13 +477,9 @@ module.exports = {
   uploadPaymentProof: async (req, res) => {
     const t = await sequelize.transaction();
     try {
-      const token = req.headers.token;
-      console.log(token);
-      const decodedToken = jwt.decode(token, { complete: true });
-      const id = decodedToken.payload.id;
+      const id = req.uid.id;
 
       const { transaction_id } = req.params;
-      console.log(transaction_id)
 
       const findUser = await users.findOne({
         where: { id },
@@ -572,7 +494,7 @@ module.exports = {
       }
 
       const findTransaction = await Transaction.findOne({
-        where: [{ user_id: id , id: transaction_id }],
+        where: { user_id: id, id: transaction_id },
       });
 
       if (!findTransaction) {
@@ -582,9 +504,8 @@ module.exports = {
           data: null,
         });
       }
-      console.log(req.files);
       if (!req.files) {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "please upload your payment proof",
           data: null,
@@ -593,11 +514,10 @@ module.exports = {
 
       // Your payment proof file path can be stored in a variable like this:
       let paymentProofFilePath = `Public/images/${req.files.images[0].filename}`;
-      console.log(req.files.images[0].path);
 
       let updatePaymentProof = await Transaction.update(
         { payment_proof: paymentProofFilePath, transaction_status_id: 2 },
-        { where: [{ user_id: id }, { id: transaction_id }] },
+        { where: { user_id: id, id: transaction_id } },
         { transaction: t }
       );
 
@@ -605,7 +525,7 @@ module.exports = {
         {
           transaction_status_id: 2,
         },
-        { where: [{ transaction_id }] },
+        { where: { transaction_id } },
         { transaction: t }
       );
 
@@ -629,18 +549,24 @@ module.exports = {
 
   cancelOrder: async (req, res) => {
     try {
-      const token = req.headers.token;
-      const decodedToken = jwt.decode(token, { complete: true });
-      const id = decodedToken.payload.id;
+      const id = req.uid.id;
 
-      const { transaction_id } = req.params.id;
+      const { id: transaction_id } = req.query;
+
+      if (!transaction_id) {
+        return res.status(400).send({
+          isError: true,
+          message: "transaction id is required",
+          data: null,
+        });
+      }
 
       const findUser = await users.findOne({
         where: { id },
       });
 
       if (!findUser) {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "user not found",
           data: null,
@@ -648,32 +574,32 @@ module.exports = {
       }
 
       const findTransaction = await Transaction.findOne({
-        where: { user_id: id },
+        where: { user_id: id, id: transaction_id },
       });
 
       if (!findTransaction) {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "transaction not found",
           data: null,
         });
       }
 
-      Transaction.update(
+      await Transaction.update(
         {
           transaction_status_id: 6,
         },
         {
-          where: { user_id: id },
+          where: { user_id: id, id: transaction_id },
         }
       );
 
-      TransactionLog.update(
+      await TransactionLog.update(
         {
           transaction_status_id: 6,
         },
         {
-          where: { transaction_id: findTransaction.id },
+          where: { transaction_id },
         }
       );
 
@@ -692,60 +618,71 @@ module.exports = {
   },
 
   confirmOrder: async (req, res) => {
-    const token = req.params.token;
-    const tokenDecode = jwt.decode(token, { complete: true });
-    const id = tokenDecode.payload.id;
-    const { action } = req.body;
+    const id = req.uid.id;
+    const { id: transaction_id } = req.query;
 
     try {
+      if (!transaction_id) {
+        return res.status(400).send({
+          isError: true,
+          message: "transaction id is required",
+          data: null,
+        });
+      }
+
       const findUser = await users.findOne({ where: { id } });
       if (!findUser) {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "user not found",
           data: null,
         });
       }
 
-      const findTransaction = await Transaction.findAll({
+      const findTransaction = await Transaction.findOne({
         where: {
           user_id: id,
+          id: transaction_id,
         },
       });
 
       if (!findTransaction) {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "transaction not found",
           data: null,
         });
       }
 
-      const findTransactionLog = await TransactionLog.findAll({
-        where: { transaction_id: findTransaction.id },
-      });
+      await Transaction.update(
+        {
+          transaction_status_id: 5,
+        },
+        {
+          where: { user_id: id, id: transaction_id },
+        }
+      );
 
-      if (!findTransactionLog) {
-        res.status(400).send({
-          isError: true,
-          message: "transaction log not found",
-          data: null,
-        });
-      }
-
-      Transaction.update({
-        transaction_status_id: 5,
-      });
-
-      TransactionLog.update({
-        transaction_status_id: 5,
-      });
+      await TransactionLog.update(
+        {
+          transaction_status_id: 5,
+        },
+        {
+          where: { transaction_id },
+        }
+      );
 
       res.status(200).send({
         isError: false,
         message: "confirm order success",
         data: null,
       });
-    } catch (error) {}
+    } catch (error) {
+      res.status(400).send({
+        isError: true,
+        message: "confirm order failed",
+        data: error.message,
+      });
+    }
   },
 };

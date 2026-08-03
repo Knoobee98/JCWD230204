@@ -12,7 +12,7 @@ router.get('/getNewProduct', productsController.getNewProducts);
 router.get('/getRecommended', productsController.getRecommendedProducts);
 router.get('/add', tokenVerify, productsController.addToCart);
 router.get('/Cart', tokenVerify, productsController.getCart);
-router.delete('/Cart/delete', productsController.removeFromCart);
-router.get('/update', productsController.updateCart);
+router.delete('/Cart/delete', tokenVerify, productsController.removeFromCart);
+router.get('/update', tokenVerify, productsController.updateCart);
 
 module.exports = router;

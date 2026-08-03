@@ -17,7 +17,6 @@ const {createToken} = require('../lib/jwtoken')
 const transporter = require('./../helpers/transport');
 const fs = require('fs').promises
 const handlebars = require('handlebars');
-const jwt = require('jsonwebtoken');
 const path = require("path");
 
 module.exports = {
@@ -106,7 +105,7 @@ module.exports = {
             )
 
             // Step-3 Kirim response
-            res.status(200).send({
+            return res.status(200).send({
                 isError: false, 
                 message: 'Account Verified!',
                 data: null 
@@ -183,7 +182,7 @@ module.exports = {
             res.status(200).send({
                 isError: false,
                 message: "Token Valid",
-                data: req.uid.name,
+                data: req.uid,
             });
         } catch (error) {
             res.status(500).send({
@@ -258,7 +257,7 @@ module.exports = {
             })
 
             if(!findUser){
-                res.status(400).send({
+                return res.status(400).send({
                     isError: true,
                     message: "user not found",
                     data: null
@@ -316,7 +315,7 @@ module.exports = {
             })
 
             if(!findUser){
-                res.status(400).send({
+                return res.status(400).send({
                     isError: true,
                     message: "user not found",
                     data: null
@@ -371,13 +370,11 @@ module.exports = {
     },
 
     getProfile: async(req, res) => {
-        const token = req.headers.token;
-        const decodeToken = jwt.decode(token, {complete: true});
-        const id = decodeToken.payload.id;
+        const id = req.uid.id;
         try {
-            const findUser = await users.findOne({id})
+            const findUser = await users.findOne({where: {id}})
             if(!findUser){
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "User not found",
                     data: null
@@ -405,15 +402,15 @@ module.exports = {
                 }
               })
               
-            if(!findProfile){
-                res.status(404).send({
+            if(!findProfile.length){
+                return res.status(404).send({
                     isError: true,
                     message: "Profile not found",
                     data: null
                 })
             }
 
-            res.status(200).send({
+            return res.status(200).send({
                 isError: false,
                 message: "Get Profile Success",
                 data: findProfile
@@ -431,19 +428,17 @@ module.exports = {
 
     updateProfile: async(req, res) => {
         const t = await sequelize.transaction()
-        const token = req.headers.token;
-        const decodeToken = jwt.decode(token, {complete: true});
-        const id = decodeToken.payload.id;
+        const id = req.uid.id;
         try {
             const {name, gender, birthdate, email} = req.body;
             console.log(name, gender, birthdate, id);
 
-            let findUser = await db.profiles.findAll({
+            let findUser = await db.users.findOne({
                 where: {id},
             })
 
             if (!findUser) {
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "User not found",
                     data: null
@@ -456,7 +451,7 @@ module.exports = {
                 gender: gender,
                 birthdate: birthdate,
             }, {
-                where: {id}
+                where: {user_id: id}
             }, {transaction: t})
 
             let updateEmail = await users.update({
@@ -485,30 +480,28 @@ module.exports = {
 
     uploadProfilePicture: async(req, res) => {
         const t = await sequelize.transaction();
-        const token = req.headers.token
-        const decodeToken = jwt.decode(token, { complete: true })
-        const id = decodeToken.payload.id
+        const id = req.uid.id;
         try {
 
-            const findUser = await users.findOne({ id })
+            const findUser = await users.findOne({ where: { id } })
 
             if(!findUser) {
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "User not found",
                     data: null
                 })
             }
 
-            if(!req.files){
-                res.status(404).send({
+            if(!req.profilePicture){
+                return res.status(404).send({
                     isError: true,
                     message: "File not found",
                     data: null
                 })
             }
             
-            let ProfilePictPath = `Public/images/${req.files.images[0].filename}`
+            let ProfilePictPath = `Public/images/${req.profilePicture.filename}`
 
             let updateProfilePicture = await profiles.update({
                 profile_pic_url: ProfilePictPath

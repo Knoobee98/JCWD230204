@@ -44,7 +44,7 @@ export default function TransactionList() {
 
     const confirmOrder = async(id) => {
         try {
-            await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/confirmOrder?id=${id}`, {}, {
+            await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/confirmOrder?id=${id}`, {
                 headers: {token: localStorage.getItem('token')}
             })
         } catch (error) {
@@ -180,7 +180,7 @@ export default function TransactionList() {
                                         transaction.transactions_status.status_name === "Waiting for Payment" ?
                                         (<td className='flex gap-4' key={index}>{transaction.transactions_status.status_name} <button onClick={() => uploadPaymentHandler(transaction.id)}>upload Payment</button> </td>) :
                                         transaction.transactions_status.status_name === "Delivery" ? 
-                                        (<td className='flex gap-4' key={index}>{transaction.transactions_status.status_name} <button onClick={() => confirmOrder}>Confirm Order</button> </td>) :
+                                        (<td className='flex gap-4' key={index}>{transaction.transactions_status.status_name} <button onClick={() => confirmOrder(transaction.id)}>Confirm Order</button> </td>) :
                                         (<td>{transaction.transactions_status.status_name}</td>)
                                     }
                                 </tr>

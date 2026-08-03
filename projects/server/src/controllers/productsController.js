@@ -1,5 +1,4 @@
 const {sequelize} = require('./../models');
-const jwt = require('jsonwebtoken');
 
 
 const db = require('./../models/index');
@@ -300,12 +299,7 @@ module.exports = {
     },
 
     getCart: async(req, res) => {
-        const token = req.headers.token
-        console.log(token)
-        const decodedToken = jwt.decode(token, {complete: true})
-        console.log(decodedToken)
-        const id = decodedToken.payload.id
-        console.log(id)
+        const id = req.uid.id
 
         try {
             const findCart = await cart.findAll({
@@ -370,11 +364,7 @@ module.exports = {
         const {product_id, quantity} = req.query
 
         try {
-            //check token
-            const token = req.headers.token
-            //obtain id from token
-            const decodedToken = jwt.decode(token, {complete: true})
-            const id = decodedToken.payload.id
+            const id = req.uid.id
 
             const findUser = await users.findOne({
                 where: {
@@ -401,7 +391,8 @@ module.exports = {
 
             const findProducts = await cart.findOne({
                 where: {
-                    product_id
+                    product_id,
+                    user_id: id
                 }
             })
 
@@ -411,7 +402,8 @@ module.exports = {
             } else {
                 await cart.update({qty: parseInt(findProducts.qty) + parseInt(quantity)}, {
                     where: {
-                        product_id
+                        product_id,
+                        user_id: id
                     }
                 })
             }
@@ -435,12 +427,14 @@ module.exports = {
     removeFromCart: async(req, res) => {
         try {
             const {id} = req.query
+            const user_id = req.uid.id
             console.log(id)
 
             //validasi data cart
             await cart.destroy({
                 where: {
-                    id
+                    id,
+                    user_id
                 }
             })
             
@@ -462,32 +456,32 @@ module.exports = {
 
     updateCart: async(req, res) => {
         const {id, option} = req.query
+        const user_id = req.uid.id
         
         try {
             const findItem = await cart.findOne({
                 where: {
-                    id
+                    id,
+                    user_id
                 }
             })
+
+            if(!findItem){
+                return res.status(400).send({
+                    isError: true,
+                    message: "cart item not found",
+                    data: null
+                })
+            }
 
             let newQty;
 
             if(option === "plus"){
                 newQty = parseInt(findItem.qty) + 1;
-                // await cart.update({qty: parseInt(findItem.qty) + 1}, {
-                //     where: {
-                //         id
-                //     }
-                // })
             } else if(option === "min") {
                 newQty = parseInt(findItem.qty) - 1;
-                // await cart.update({qty: parseInt(findItem.qty) - 1}, {
-                //     where: {
-                //         id
-                //     }
-                // })
             } else {
-                res.status(400).send({
+                return res.status(400).send({
                     isError: true,
                     message: "invalid option",
                     data: null
@@ -495,23 +489,25 @@ module.exports = {
             }
 
             if(newQty < 0){
-                res.status(400).send({
+                return res.status(400).send({
                     isError: true,
                     message: "quantity cannot negative",
                     data: null
                 })
             }
 
-            await cart.update({qty: newQty}, {
-                where: {
-                    id
-                }
-            })
-
             if(newQty < 1){
                 await cart.destroy({
                     where: {
-                        id
+                        id,
+                        user_id
+                    }
+                })
+            } else {
+                await cart.update({qty: newQty}, {
+                    where: {
+                        id,
+                        user_id
                     }
                 })
             }
@@ -562,9 +558,7 @@ module.exports = {
 
     addWishlist: async(req, res) => {
         const {product_id} = req.query
-        const token = req.headers.token
-        const decodeToken = jwt.decode(token, {complete: true})
-        const userid = decodeToken.payload.id
+        const userid = req.uid.id
         
         try {
             const findUser = await users.findOne({
@@ -574,7 +568,7 @@ module.exports = {
             })
 
             if(!findUser){
-                res.status(400).send({
+                return res.status(400).send({
                     isError: true,
                     message: "user not found",
                     data: null
@@ -582,24 +576,25 @@ module.exports = {
             } 
 
             if(findUser.status === "unconfirmed"){
-                res.status(400).send({
+                return res.status(400).send({
                     isError: true,
                     message: "user not confirmed, please confirmed your email",
                     data: null
                 })
             }
 
-            const findWishlist = await wishlist.findAll({
+            const findWishlist = await wishlist.findOne({
                 where: {
-                    user_id: userid
+                    user_id: userid,
+                    product_id
                 }
             })
 
-            if(!findWishlist){
-                res.status(400).send({
+            if(findWishlist){
+                return res.status(400).send({
                     isError: true,
-                    message: "wishlist not found",
-                    data: {}
+                    message: "product already in wishlist",
+                    data: null
                 })
             }
 
@@ -624,9 +619,7 @@ module.exports = {
     },
 
     getWishlists: async(req, res) => {
-        const token = req.headers.token
-        const decodeToken = jwt.decode(token, {complete: true})
-        const userid = decodeToken.payload.id
+        const userid = req.uid.id
 
         try {
             const findUser = await users.findOne({
@@ -636,7 +629,7 @@ module.exports = {
             })
 
             if(!findUser){
-                res.status(400).send({
+                return res.status(400).send({
                     isError: true,
                     message: "user not found",
                     data: null
@@ -645,10 +638,10 @@ module.exports = {
 
             const findWishlist = await wishlist.findAll({
                 include: [
-                    {models: products, attributes: ['products_name'],
+                    {model: products, attributes: ['products_name'],
                 include: [
-                    {models: products_detail, attributes: ['price']},
-                    {models: products_image, attributes: ['url']},
+                    {model: products_detail, attributes: ['price']},
+                    {model: products_image, attributes: ['url']},
                 ]},
                 ],
                 where: {
@@ -656,18 +649,10 @@ module.exports = {
                 }
             })
 
-            if(!findWishlist){
-                res.status(400).send({
-                    isError: true,
-                    message: "wishlist not found",
-                    data: null
-                })
-            }
-
             res.status(200).send({
                 isError: false,
                 message: "get wishlist success",
-                data: null
+                data: findWishlist
             })
             
         } catch (error) {
@@ -680,8 +665,21 @@ module.exports = {
     },
 
     deleteWishlist: async(req, res) => {
+        const {id} = req.query
+        const userid = req.uid.id
         try {
-            
+            await wishlist.destroy({
+                where: {
+                    id,
+                    user_id: userid
+                }
+            })
+
+            res.status(200).send({
+                isError: false,
+                message: "delete wishlist success",
+                data: null
+            })
         } catch (error) {
             res.status(404).send({
                 isError: true,
