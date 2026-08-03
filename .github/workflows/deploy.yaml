@@ -39,5 +39,17 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             cd ${{ secrets.SSH_FOLDER }}
+            mkdir -p projects/server
+            cat > projects/server/.env <<'EOF'
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            EMAIL_USER=${{ secrets.EMAIL_USER }}
+            EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+            RAJAONGKIR_API_KEY=${{ secrets.RAJAONGKIR_API_KEY }}
+            OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
+            EOF
             npm install
-            pm2 start deploy.config.js
+            pm2 restart deploy.config.js || pm2 start deploy.config.js
