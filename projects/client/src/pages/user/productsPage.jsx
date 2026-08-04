@@ -11,16 +11,12 @@ export default function ProductPage(){
     const [filter, setFilter] = useState('productsName')
     const [sort, setSort] = useState('name')
     const [sortType, setSortType] = useState('asc')
-    
+
     const [page, setPage] = useState(1)
-    const [itemsPerPage, setItemsPerPage] = useState(8)
+    const [totalPages, setTotalPages] = useState(1)
 
     const search = useRef()
 
-    const indexOfLastItem = page * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = products.slice(indexOfFirstItem, indexOfLastItem)
-    const totalPage = Math.ceil(products.length / itemsPerPage)
     const paginate = (pageNumber) => setPage(pageNumber)
 
     const Navigate = useNavigate()
@@ -30,7 +26,7 @@ export default function ProductPage(){
             const url = process.env.REACT_APP_API_GET_PRODUCTS_PAGE.replace(':page', page).replace(':sort', sort).replace(':sortType', sortType).replace(':filter', filter)
             const response = await axios.get(url)
             setProducts(response.data.data)
-            
+            setTotalPages(response.data.totalPages || 1)
         } catch (error) {
             console.log(error)
         }
@@ -48,8 +44,7 @@ export default function ProductPage(){
     useEffect(() => {
         getProducts()
         getCategory()
-        handleSort()
-    }, [ sort, sortType])
+    }, [ page, sort, sortType])
 
     const handleFilter = async() => {
         const inputSearch = search.current.value;
@@ -59,17 +54,8 @@ export default function ProductPage(){
             const response = await axios.get(url);
             console.log(response.data.data)
             setProducts(response.data.data)
-        } catch (error) {
-            console.log(error.message)
-        }
-    }
-
-    const handleSort = async () => {
-        try {
-            const url = process.env.REACT_APP_API_PRODUCTS_SORT.replace(':sort', sort).replace(':sortType', sortType)
-            const response = await axios.get(url);
-            console.log(response.data.data)
-            setProducts(response.data.data)
+            setTotalPages(response.data.totalPages || 1)
+            setPage(1)
         } catch (error) {
             console.log(error.message)
         }
@@ -121,7 +107,7 @@ export default function ProductPage(){
                     <div className='flex flex-col gap-3 text-black'>
                         <input type='text' ref={search} placeholder='filter...' className='rounded-lg h-[30px] pl-3'/>
                         <select value={filter} onChange={(event) => setFilter(event.target.value)}>
-                            <option value={'ProductsName'}>Product Name</option>
+                            <option value={'productsName'}>Product Name</option>
                             <option value={'category'}>Category</option>
                         </select>
                         <button onClick={handleFilter} className="text-white">filter</button>
@@ -136,14 +122,13 @@ export default function ProductPage(){
                 </div>
                 <div className="grid xl:grid-cols-4 md:grid-cols-2 gap-3 relative z-0">
                    {
-                        currentItems.length ? currentItems.map((product) => {
-                            console.log(product)
+                        products.length ? products.map((product) => {
                             return(
                                 <div key={product.id} onClick={() => Navigate(`/user/Details/${product.id}`)}>
                                     
                                     <div className="h-[350px] w-[200px] flex flex-col gap-3 border rounded-lg drop-shadow-lg">
                                         <div className="bg-slate-300 rounded-t-lg">
-                                            <img key={product.id} src={`${process.env.REACT_APP_API_BASE_URL}/Public/products/${product.products_images[0].url}`} alt="" className="h-[200px] w-[200px] object-cover rounded-t-lg"/>
+                                            <img key={product.id} src={`${process.env.REACT_APP_API_BASE_URL}/Public/products/${product.products_images?.[0]?.url}`} alt="" className="h-[200px] w-[200px] object-cover rounded-t-lg"/>
                                         </div>
                                         <div className="flex flex-col gap-4 justify-around text-white px-2">
                                             <h2 className="text-sm " key={product.id}>{product.products_name}</h2>
@@ -165,9 +150,9 @@ export default function ProductPage(){
                 <div>
                     <div className="flex gap-4 p-2 border bg-slate-200 rounded-md">
                         {
-                            Array.from({length: totalPage}, (_, index) => index + 1).map((page) => {
+                            Array.from({length: totalPages}, (_, index) => index + 1).map((pageNumber) => {
                                 return(
-                                    <button key={page} className="" onClick={() => paginate(page)}>{page}</button>
+                                    <button key={pageNumber} className="" onClick={() => paginate(pageNumber)}>{pageNumber}</button>
                                 )
                             })
                         }

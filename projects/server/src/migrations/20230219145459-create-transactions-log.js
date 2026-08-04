@@ -9,8 +9,14 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      name: {
-        type: Sequelize.STRING
+      datetime: {
+        type: Sequelize.DATE
+      },
+      transaction_id: {
+        type: Sequelize.INTEGER
+      },
+      transaction_status_id: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,

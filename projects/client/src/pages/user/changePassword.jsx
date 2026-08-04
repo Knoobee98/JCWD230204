@@ -33,21 +33,21 @@ export default function ChangePassword (){
 			setDisabled(true);
 
 			let data = await axios.patch(
-				`${process.env.REACT_APP_API_BASE_URL}/users/change-password/`,
-				{ id: location.pathname.slice(16), password: password.current.value, newPassword: newPassword.current.value, confirmPassword: confirmPassword.current.value },
+				`${process.env.REACT_APP_API_BASE_URL}/api/users/change-password`,
+				{ password: password.current.value, newPassword: newPassword.current.value, confirmPassword: confirmPassword.current.value },
                 { headers: {
                     token: localStorage.getItem("token"),
                 }}
 			);
             console.log(data)
-			toast.success(data.message);
+			toast.success(data.data.message);
 			newPassword.current.value = ''
 			confirmPassword.current.value = ''
 			setTimeout(() => {
 				Navigate("/user/login");
 			}, 3000);
 		} catch (error) {
-			toast.error(error.response.data.message);
+			toast.error(error.response?.data?.message || error.message);
 		} finally {
 			setDisabled(false);
 		}

@@ -9,6 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      user_id: {
+        type: Sequelize.UUID
+      },
       name: {
         type: Sequelize.STRING
       },
@@ -18,7 +21,7 @@ module.exports = {
       birthdate: {
         type: Sequelize.DATE
       },
-      profile_pict_url: {
+      profile_pic_url: {
         type: Sequelize.STRING
       },
       createdAt: {

@@ -62,7 +62,7 @@ module.exports = {
             // step 5 : kirim email
             const template = await fs.readFile(path.resolve(__dirname, '../template/confirmation.html'), 'utf-8')
             const templateToCompile = handlebars.compile(template)
-            const newTemplate = templateToCompile({username:username, url: `https://jcwd230204.purwadhikabootcamp.com/activation/${resCreateUser.id}`,})
+            const newTemplate = templateToCompile({username:username, url: `${process.env.CLIENT_BASE_URL || 'https://jcwd230204.purwadhikabootcamp.com'}/activation/${resCreateUser.id}`,})
      
             await transporter.sendMail({
                 from: 'GAMEPEDIA',
@@ -85,7 +85,7 @@ module.exports = {
             res.status(404).send({
                 isError: true, 
                 message: "Register Failed", 
-                data: error
+                data: error.message
             })
         }
     },
@@ -328,7 +328,6 @@ module.exports = {
                 message: "Please Input Your Password",
                 data: null,
             });
-            console.log(findUser.dataValues.password)
             let hashMatchResult = await hashMatch(password, findUser.dataValues.password);
             
             if(hashMatchResult === false) 
@@ -444,21 +443,22 @@ module.exports = {
                     data: null
                 })
             }
-            console.log(findUser)
 
             let updateUser = await db.profiles.update({
                 name: name,
                 gender: gender,
                 birthdate: birthdate,
             }, {
-                where: {user_id: id}
-            }, {transaction: t})
+                where: {user_id: id},
+                transaction: t
+            })
 
             let updateEmail = await users.update({
                 email: email
             }, {
-                where: {id}
-            }, {transaction: t})
+                where: {id},
+                transaction: t
+            })
 
             await t.commit()
 
@@ -508,8 +508,9 @@ module.exports = {
             }, {
                 where: {
                     user_id: id
-                }
-            }, {transaction: t})
+                },
+                transaction: t
+            })
 
             await t.commit()
 

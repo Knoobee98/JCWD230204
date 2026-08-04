@@ -13,7 +13,6 @@ import Activation from "./pages/user/activation";
 import Login from "./pages/user/login";
 import Profiling from "./pages/user/profiling";
 import EditProfile from "./pages/user/editProfile";
-import EditProfileForm from "./pages/user/editProfile";
 import ResetPassword from "./pages/user/resetPassword";
 import ForgotPassword from "./pages/user/forgotPassword";
 import ChangePassword from "./pages/user/changePassword";
@@ -63,7 +62,6 @@ useEffect(() => {
         <Route path="/user/login" element={<Login />} />
         <Route path="/user/Profile" element={<Profiling />} />
         <Route path="/user/editProfile" element={<EditProfile />} />
-        <Route path="/user/EditProfile" element={<EditProfileForm />} />
         <Route path="/user/resetPassword/:id" element={<ResetPassword />} />
         <Route path="/user/forgotPassword" element={<ForgotPassword />} />
         <Route path="/user/changePassword" element={<ChangePassword />} />

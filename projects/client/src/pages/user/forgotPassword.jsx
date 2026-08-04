@@ -27,7 +27,7 @@ export default function ForgotPassword(){
 			}, 3000);
 		} catch (error) {
 			console.log(error.message)
-			toast.error(error.message);
+			toast.error(error.response?.data?.message || error.message);
 		} finally {
 			setDisabled(false);
 		}

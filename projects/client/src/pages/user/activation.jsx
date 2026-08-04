@@ -12,7 +12,8 @@ export default function Activation(){
 
     const confirm = async() => {
         try {
-            await axios.patch('http://localhost:8000/users/activation/id', {id:Location.pathname.slice(12)})
+            const userId = Location.pathname.split('/').pop();
+            await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/api/users/activation/${userId}`, {id: userId})
             setTimeout(()=> {
                 Navigate("/user/login")
             }, 3000)

@@ -131,7 +131,7 @@ export default function CheckoutPage(){
         getCity()
         getProvince()
         getLocation()
-    }, [latitude, longitude])
+    }, [])
 
     const handleDestinationChange = (event) => {
         setDestination(event.target.value)

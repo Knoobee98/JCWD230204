@@ -20,141 +20,70 @@ const {Op} = require('sequelize');
 module.exports = {
     getAllProducts: async(req, res) => {
         const {sortBy, sortType, filter, search} = req.query
-        const productsPerPage = parseInt(req.query.productsPerPage) || 10
-        const currentPage = parseInt(req.query.currentPage) || 1
-        console.log(sortBy, sortType, filter, search)
-        let findProducts;
-        
-        try {
-             findProducts = await products.findAll({
-                include: [
-                    {
-                        model: products_detail,
-                        attributes: {
-                            exclude: ["createdAt", "updatedAt"]
-                        }
-                    },
-                    {
-                        model: products_image,
-                        attributes: {
-                            exclude: ["createdAt", "updatedAt"]
-                        }
-                    },
-                    {
-                        model: category,
-                        attributes: {
-                            exclude: ["createdAt", "updatedAt"]
-                        }
-                    }
-                ]
-            })
+        const page = parseInt(req.query.page) || null
+        const limit = parseInt(req.query.limit) || 8
+        const offset = page ? (page - 1) * limit : 0
 
-            //template for filter by products name
-            // Product.findAll({
-            //     include: [{ model: Category }, { model: ProductDetail }],
-            //     attributes: ['products_name', [Sequelize.col('ProductDetail.description'), 'description'], [Sequelize.col('ProductDetail.price'), 'price'], [Sequelize.col('Category.category'), 'category']],
-            //     where: { products_name: { [Sequelize.Op.like]: '%sony%' } }
-            //   });
+        const where = {}
+        const order = []
 
-            //template for filter by category name
-            // Product.findAll({
-            //     include: [{ model: Category }, { model: ProductDetail }],
-            //     attributes: ['products_name', [Sequelize.col('ProductDetail.description'), 'description'], [Sequelize.col('ProductDetail.price'), 'price'], [Sequelize.col('Category.category'), 'category']],
-            //     where: { '$Category.category$': { [Sequelize.Op.like]: '%acces%' } }
-            //   });
-              
-            //filter products
-            // filter by products name
-            if(filter === 'productsName' ){
-                findProducts = await products.findAll({
-                    include: [{model: category, required: true}, {model:products_detail, required: true}, {model:products_image, required: true}],
-                    attributes: ['id', 'products_name', [sequelize.col('products_details.desc'), 'desc'], [sequelize.col('products_details.price'), 'price'], [sequelize.col('category.category'), 'category'], [sequelize.col('products_images.url'), 'url']],
-                    where: {products_name: {[Op.like]: `%${search}%`}}
-                })
-            } else if(filter === 'category'){
-                findProducts = await products.findAll({
-                    include: [{model: category, required: true}, {model:products_detail, required: true}, {model:products_image, required: true}],
-                    attributes: ['id', 'products_name', [sequelize.col('products_details.desc'), 'desc'], [sequelize.col('products_details.price'), 'price'], [sequelize.col('category.category'), 'category'], [sequelize.col('products_images.url'), 'url']],
-                    where: {'$category.category$': {[Op.like]: `%${search}%`}}
-                })
-            }
-
-            //template for sort by name
-            // Product.findAll({
-            //     include: [{ model: ProductDetail }],
-            //     attributes: ['products_name', [Sequelize.col('ProductDetail.description'), 'description'], [Sequelize.col('ProductDetail.price'), 'price']],
-            //     order: [['products_name', 'ASC']]
-            //   });
-
-            //template for sort by price
-            // Product.findAll({
-            //     include: [{ model: ProductDetail }],
-            //     attributes: ['products_name', [Sequelize.col('ProductDetail.description'), 'description'], [Sequelize.col('ProductDetail.price'), 'price']],
-            //     order: [[Sequelize.col('ProductDetail.price'), 'ASC']]
-            //   });
-                            
-
-            //sort products
-            //sort by name asc
-            if(sortBy === 'name' && sortType === 'asc'){
-                findProducts = await products.findAll({
-                    include: [{model: products_detail, required: true}, {model:products_image, required: true}],
-                    attributes: ['id', 'products_name', [sequelize.col('products_details.desc'), 'desc'], [sequelize.col('products_details.price'), 'price'], [sequelize.col('products_images.url'), 'url']],
-                    order: [['products_name', 'ASC']]
-                  });
-                  
-            } else
-            
-            if(sortBy === 'name' && sortType === 'desc'){
-                findProducts = await products.findAll({
-                    include: [{model: products_detail, required: true}, {model:products_image, required: true}],
-                    attributes: ['id', 'products_name', [sequelize.col('products_details.desc'), 'desc'], [sequelize.col('products_details.price'), 'price'], [sequelize.col('products_images.url'), 'url']],
-                    order: [['products_name', 'DESC']]
-                })
-            } else
-            //sort by price asc
-            if(sortBy === 'price' && sortType === 'asc'){
-                findProducts = await products.findAll({
-                    include: [{model: products_detail, required: true}, {model:products_image, required: true}],
-                    attributes: ['id', 'products_name', [sequelize.col('products_details.desc'), 'desc'], [sequelize.col('products_details.price'), 'price'], [sequelize.col('products_images.url'), 'url']],
-                    order: [[sequelize.col('products_details.price'), 'ASC']]
-                })
-            } else
-            //if sort by product price order descending then sort product by product price descending
-            if(sortBy === 'price' && sortType === 'desc'){
-                findProducts = await products.findAll({
-                    include: [{model: products_detail, required: true}, {model:products_image, required: true}],
-                    attributes: ['id', 'products_name', [sequelize.col('products_details.desc'), 'desc'], [sequelize.col('products_details.price'), 'price'], [sequelize.col('products_images.url'), 'url']],
-                    order: [[sequelize.col('products_details.price'), 'DESC']]
-                })
-            }
-
-            const findImg = await products_image.findAll({
-                include: [{model: products}],
-            })
-            console.log(findProducts)
-
-
-            res.status(200).send({
-                isError: false,
-                message: "get data sucess",
-                data: findProducts
-            })
-
-        } catch (error) {
-            res.status(404).send({
-                isError: true,
-                message: "get data failed",
-                data: error.message
-            })
+        if(filter === 'productsName' && search){
+            where.products_name = {[Op.like]: `%${search}%`}
+        } else if(filter === 'category' && search){
+            where['$category.category$'] = {[Op.like]: `%${search}%`}
         }
+
+        if(sortBy === 'name'){
+            order.push(['products_name', sortType === 'desc' ? 'DESC' : 'ASC'])
+        } else if(sortBy === 'price'){
+            order.push([[products_detail, 'price', sortType === 'desc' ? 'DESC' : 'ASC']])
+        }
+
+        const options = {
+            where,
+            order,
+            include: [
+                {
+                    model: products_detail,
+                    attributes: { exclude: ["createdAt", "updatedAt"] },
+                    required: false,
+                },
+                {
+                    model: products_image,
+                    attributes: { exclude: ["createdAt", "updatedAt"] },
+                    required: false,
+                },
+                {
+                    model: category,
+                    attributes: { exclude: ["createdAt", "updatedAt"] },
+                    required: false,
+                }
+            ],
+            distinct: true,
+        }
+
+        if (page) {
+            options.limit = limit
+            options.offset = offset
+        }
+
+        const { count, rows } = await products.findAndCountAll(options)
+
+        res.status(200).send({
+            isError: false,
+            message: "get data success",
+            data: rows,
+            totalItems: count,
+            totalPages: page ? Math.ceil(count / limit) : 1,
+            currentPage: page || 1,
+        })
     },
 
     getProductDetail: async(req, res) => {
         try{
             const {id} = req.query
             console.log(id)
-            let findProductDetail = await await products.findAll({
+            let findProductDetail = await products.findAll({
                 attributes: ['id', 'products_name'],
                 include: [
                   {
@@ -267,20 +196,14 @@ module.exports = {
     getRecommendedProducts: async(req, res) => {
         try {
             //find recommended products by the most purchased items in transactions
-            let findRecommendedProducts = await transactions.findAll({
+            let findRecommendedProducts = await transactions_details.findAll({
                 attributes: [
-                    [sequelize.literal('products.*'), 'product'],
-                    [sequelize.fn('COUNT', sequelize.col('transactions.productId')), 'count']
-                  ],
-                  include: [
-                    {
-                      model: products,
-                      attributes: []
-                    }
-                  ],
-                  group: ['transactions.productId'],
-                  order: [[sequelize.literal('count'), 'DESC']],
-                  limit: 10
+                    'product_name',
+                    [sequelize.fn('COUNT', sequelize.col('product_name')), 'count']
+                ],
+                group: ['product_name'],
+                order: [[sequelize.literal('count'), 'DESC']],
+                limit: 10
             })
             console.log(findRecommendedProducts)
 
@@ -530,7 +453,7 @@ module.exports = {
     stockHistory: async(req, res) => {
         try {
             const findStockHistory = await stock_history.findAll({
-                include: ['id', 'event_type', 'quantity_changed', 'remaining_quantity', 'product_id']
+                attributes: ['id', 'event_type', 'quantity_changed', 'remaining_quantity', 'product_id']
             })
 
             if(!findStockHistory){

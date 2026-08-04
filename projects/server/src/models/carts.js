@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   carts.init({
-    qty: DataTypes.STRING
+    qty: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'carts',

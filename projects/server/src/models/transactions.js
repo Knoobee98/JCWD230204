@@ -14,9 +14,6 @@ module.exports = (sequelize, DataTypes) => {
       transactions.hasMany(models.transactions_details, {
         foreignKey: 'transaction_id',
       }),
-      transactions.hasMany(models.transactions_detail, {
-        foreignKey: 'transaction_id',
-      })
       transactions.belongsTo(models.transactions_status, {
         foreignKey: 'transaction_status_id',
       }),
@@ -37,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
     total: DataTypes.INTEGER,
     user_id: DataTypes.STRING,
     orderId: DataTypes.STRING,
+    transaction_status_id: DataTypes.INTEGER,
   }, {
     sequelize,
     modelName: 'transactions',

@@ -18,6 +18,33 @@ module.exports = {
       payment_proof: {
         type: Sequelize.STRING
       },
+      address: {
+        type: Sequelize.STRING
+      },
+      city: {
+        type: Sequelize.STRING
+      },
+      state: {
+        type: Sequelize.STRING
+      },
+      postal_code: {
+        type: Sequelize.STRING
+      },
+      shipping: {
+        type: Sequelize.STRING
+      },
+      total: {
+        type: Sequelize.INTEGER
+      },
+      user_id: {
+        type: Sequelize.UUID
+      },
+      orderId: {
+        type: Sequelize.STRING
+      },
+      transaction_status_id: {
+        type: Sequelize.INTEGER
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

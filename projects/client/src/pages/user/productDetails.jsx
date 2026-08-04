@@ -51,12 +51,9 @@ export default function ProductDetails(){
             const response = await axios.get(url, {
                 headers: { token }
             })
-            // console.log(response.data)
-            toast.success(response.response.data.message)
-        } catch (response) {
-            // console.log(response.data.message)
-            // console.log(response.response.data.message)
-            toast.error(response.response.data.message)
+            toast.success(response.data.message)
+        } catch (error) {
+            toast.error(error.response?.data?.message || error.message)
         }
         
         
@@ -79,7 +76,7 @@ export default function ProductDetails(){
             <div className="bg-[#6d6d6d] rounded-lg w-[1000px]">
                 <div className='flex justify-around h-[700px]'>
                     <div className=' flex flex-col justify-center items-center w-[400px]'>
-                        <div><img src={`${process.env.REACT_APP_API_BASE_URL}/Public/products/${product[0] ? product[0].products_images[0].url : null}`} alt="" className='rounded-lg'/></div>
+                        <div><img src={`${process.env.REACT_APP_API_BASE_URL}/Public/products/${product[0] ? product[0].products_images?.[0]?.url : null}`} alt="" className='rounded-lg'/></div>
                     </div>
                     <div className=' flex flex-col justify-center items-center gap-4 w-[400px] p-4 text-[#cfcfcf]'>
                         <div>

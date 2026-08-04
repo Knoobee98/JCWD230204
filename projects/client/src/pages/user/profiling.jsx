@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import EditProfileForm from './editProfile';
-import { Link, Navigate, useNavigate} from 'react-router-dom';
+import { useNavigate} from 'react-router-dom';
 import NavbarUser from "../../components/navbaruser";
 import HomeMenu from "../../components/homemenu";
 import Footer from "../../components/footer";
@@ -13,18 +12,26 @@ export default function Profiling (){
     const [dataProfile, setDataProfile] = useState([])
 
     const getProfile = async () => {
-      const response = await axios.get(process.env.REACT_APP_API_GET_PROFILE)
-      console.log(response.data.data)
-      setDataProfile(response.data.data)
+      try {
+        const response = await axios.get(process.env.REACT_APP_API_GET_PROFILES, {
+          headers: {
+            token: localStorage.getItem('token')
+          }
+        })
+        console.log(response.data.data)
+        setDataProfile(response.data.data || [])
+      } catch (error) {
+        console.log(error.message)
+      }
     }
 
     useEffect(() => {
         getProfile();
-    })
+    }, [])
 
     const handleButtonClick = () => {
         // Navigate to PageB
-        navigate('/editProfile');
+        navigate('/user/editProfile');
     };
 
     return(

@@ -16,18 +16,16 @@ export default function EditProfileForm(){
             let inputName = name.current.value
             let inputGender = gender.current.value
             let inputBirthdate = birthdate.current.value
-            let result = await axios.patch('localhost:8000/users/editProfiles', {email: inputEmail, name: inputName, gender: inputGender, birthdate: inputBirthdate})
+            let result = await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/api/users/update`, {email: inputEmail, name: inputName, gender: inputGender, birthdate: inputBirthdate}, {
+                headers: {
+                    token: localStorage.getItem('token')
+                }
+            })
+            console.log(result.data.message)
         }catch (error){
             console.log(error)
         }
     }
-
-    // const handleSubmit = (event) => {
-    //     event.preventDefault();
-    // };
-    const updateProfile = () => {
-        let contoh = axios.put('localhost:8000/users/update')
-    };
     return(
         <>
          <NavbarUser/>

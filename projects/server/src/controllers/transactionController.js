@@ -5,7 +5,7 @@ const users = db.users;
 const products = db.products;
 const products_detail = db.products_detail;
 const Transaction = db.transactions;
-const TransactionDetail = db.transactions_detail;
+const TransactionDetail = db.transactions_details;
 const TransactionLog = db.transactions_log;
 const TransactionStatus = db.transactions_status;
 const cart = db.carts;
@@ -29,7 +29,7 @@ module.exports = {
       });
 
       if (!findUser) {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "user not found",
           data: null,
@@ -275,7 +275,7 @@ module.exports = {
       }
 
       if (!findTransaction) {
-        res.status(400).send({
+        return res.status(400).send({
           isError: true,
           message: "transaction not found",
           data: null,
@@ -343,9 +343,28 @@ module.exports = {
       const transactionId = nanoid(13);
       // console.log(transactionId);
 
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+
+      if (
+        Number.isNaN(lat) ||
+        Number.isNaN(lng) ||
+        lat < -90 ||
+        lat > 90 ||
+        lng < -180 ||
+        lng > 180
+      ) {
+        await t.rollback();
+        return res.status(400).send({
+          isError: true,
+          message: "invalid location",
+          data: null,
+        });
+      }
+
       const userLocation = {
-        lat: latitude,
-        lng: longitude,
+        lat,
+        lng,
       }
 
       //get branchStores
@@ -366,6 +385,8 @@ module.exports = {
         order: [[sequelize.col('distances'), 'ASC']],
         limit: 3
       });
+
+      let transaction;
 
       if(findStores.length > 0){
         const storeId = findStores[0].dataValues.id;
@@ -415,7 +436,7 @@ module.exports = {
         }
 
         //create transaction
-        const transaction = await Transaction.create({
+        transaction = await Transaction.create({
           date: new Date(),
           expiry_date: expiredTime,
           address,
@@ -451,7 +472,12 @@ module.exports = {
         console.log('TransactionLog and TransactionDetails created for the entire transaction');
 
       } else {
-        console.log('No store found');
+        await t.rollback();
+        return res.status(400).send({
+          isError: true,
+          message: "no store found near your location",
+          data: null,
+        });
       }
 
       //delete cart
@@ -461,11 +487,14 @@ module.exports = {
       res.status(200).send({
         isError: false,
         message: "place order success",
-        data: null,
+        data: { id: transaction.id },
       });
 
     } catch (error) {
-      await t.rollback();
+      if (t.finished !== "commit") {
+        await t.rollback();
+      }
+      console.error("addTransaction error:", error);
       res.status(400).send({
         isError: true,
         message: "add transaction failed",
@@ -517,16 +546,14 @@ module.exports = {
 
       let updatePaymentProof = await Transaction.update(
         { payment_proof: paymentProofFilePath, transaction_status_id: 2 },
-        { where: { user_id: id, id: transaction_id } },
-        { transaction: t }
+        { where: { user_id: id, id: transaction_id }, transaction: t }
       );
 
       await TransactionLog.update(
         {
           transaction_status_id: 2,
         },
-        { where: { transaction_id } },
-        { transaction: t }
+        { where: { transaction_id }, transaction: t }
       );
 
       await t.commit();

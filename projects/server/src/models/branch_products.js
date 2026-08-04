@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   branch_products.init({
-    stock: DataTypes.STRING
+    stock: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'branch_products',

@@ -27,21 +27,22 @@ export default function ResetPassword (){
 		try {
 			setDisabled(true);
 
+			const userId = location.pathname.split('/').pop();
 			let { data } = await axios.patch(
-				`${process.env.REACT_APP_API_BASE_URL}/api/users/resetPassword/id`,
+				`${process.env.REACT_APP_API_BASE_URL}/api/users/resetPassword/${userId}`,
 
-				{ id: location.pathname.slice(33), password: password.current.value, confirmPassword: confirmPassword.current.value }
+				{ id: userId, password: password.current.value, confirmPassword: confirmPassword.current.value }
 			);
 
-			toast.success(data.data.message);
+			toast.success(data.message);
 			password.current.value = ''
 			confirmPassword.current.value = ''
 
 			setTimeout(() => {
 				Navigate("/user/login");
 			}, 3000);
-		} catch (data) {
-			toast.error(data.data.message);
+		} catch (error) {
+			toast.error(error.response?.data?.message || error.message);
 		} finally {
 			setDisabled(false);
 		}

@@ -31,7 +31,7 @@ export default function Login(){
 				Navigate("/");
 			}, 1000);
 		} catch (error) {
-			toast.error(error.message);
+			toast.error(error.response?.data?.message || error.message);
 		}
 	};
 

@@ -99,7 +99,7 @@ module.exports = {
             let {email, password} = req.body;
 
             if(!email.length || !password.length)
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "Input must be filled",
                     data: null,
@@ -112,7 +112,7 @@ module.exports = {
             });
 
             if(findEmail) 
-                res.status(404).send({
+                return res.status(404).send({
                 isError: true, 
                 message: 'Email already exist', 
                 data: null
@@ -182,6 +182,14 @@ module.exports = {
                 return res.status(404).send({
                     isError: true,
                     message: "Transaction Not Found",
+                    data: null,
+                })
+            }
+
+            if(!transactionStatus){
+                return res.status(404).send({
+                    isError: true,
+                    message: "Transaction Status is required",
                     data: null,
                 })
             }
@@ -324,13 +332,19 @@ module.exports = {
         try {
             const { product_name, product_desc, product_category, product_price, product_stock, branch_id } = req.body;
 
-            const createProductCategory = await categoryProducts.create({
-                category: product_category,
-            }, {transaction: t})
+            let productCategory = await categoryProducts.findOne({
+                where: { category: product_category }
+            });
+
+            if (!productCategory) {
+                productCategory = await categoryProducts.create({
+                    category: product_category,
+                }, {transaction: t})
+            }
 
             const createProduct = await products.create({
-                product_name: product_name,
-                category_id: createProductCategory.id,
+                products_name: product_name,
+                category_id: productCategory.id,
             }, {transaction: t})
 
             const createProductDetail = await productsDetail.create({
@@ -416,8 +430,9 @@ module.exports = {
             }, {
                 where: {
                     product_id: product_id
-                }
-            }, {transaction: t})
+                },
+                transaction: t
+            })
 
             await t.commit()
             res.status(200).send({
@@ -457,20 +472,22 @@ module.exports = {
             }
 
             const updateProduct = await products.update({
-                product_name: product_name,
+                products_name: product_name,
             }, {
                 where: {
                     id: product_id,
-                }
-            }, {transaction: t})
+                },
+                transaction: t
+            })
 
             const updateProductCategory = await categoryProducts.update({
                 category: product_category
             }, {
                 where: {
                     id: findProduct.category_id
-                }
-            }, {transaction: t})
+                },
+                transaction: t
+            })
 
             const updateProductDetail = await productsDetail.update({
                 price: product_price,
@@ -478,8 +495,9 @@ module.exports = {
             }, {
                 where: {
                     product_id: product_id,
-                }
-            }, {transaction: t})
+                },
+                transaction: t
+            })
 
             //update product images
 
@@ -488,15 +506,16 @@ module.exports = {
             }, {
                 where: {
                     product_id: product_id,
-                }
-            }, {transaction: t})
+                },
+                transaction: t
+            })
 
             const updateStockHistory = await stockHistory.create({
                 product_id: product_id,
                 event_type: 'admin change stock',
                 event_date: new Date(),
                 quantity_changed: product_stock,
-                quantity_remaining: product_stock,
+                remaining_quantity: product_stock,
             }, {transaction: t})
 
             await t.commit();
@@ -564,7 +583,7 @@ module.exports = {
 
     getStockHistory: async(req, res) => {
         try {
-            const {product_id} = req.body;
+            const {product_id} = req.query;
 
             const findStockHistory = await stockHistory.findAll({
                 where: {
@@ -595,7 +614,7 @@ module.exports = {
 
             const findAdmin = await admin.findByPk(admin_id)
             if(!findAdmin){
-                res.status(404).send({
+                return res.status(404).send({
                     isError: true,
                     message: "Admin not found",
                     data: null,
@@ -603,7 +622,7 @@ module.exports = {
             }
             const today = new Date()
             const expiry_date = new Date(today.setDate(today.getDate() + days))
-            const productIds = product_id
+            const productIds = Array.isArray(product_id) ? product_id : [product_id]
             const discounts = []
 
             for(const product_id of productIds){

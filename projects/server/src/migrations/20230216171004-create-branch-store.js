@@ -9,10 +9,19 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      admin_id: {
+        type: Sequelize.INTEGER
+      },
       branch_name: {
         type: Sequelize.STRING
       },
       address: {
+        type: Sequelize.STRING
+      },
+      city: {
+        type: Sequelize.STRING
+      },
+      province: {
         type: Sequelize.STRING
       },
       longitude: {

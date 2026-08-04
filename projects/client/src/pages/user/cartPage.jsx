@@ -28,21 +28,33 @@ export default function Cart() {
       setCart(response.data.data);
       setTotal(response.data.totalAfterDiscount);
       setSubtotal(response.data.totalBeforeDiscount);
-      setDiscount(response.data.data[0].product.discounts[0].name)
-      setCartId(response.data.data[0].id);
-      // console.log(response.data.data[0].id)
+      if (response.data.data && response.data.data.length) {
+        const firstItem = response.data.data[0];
+        setDiscount(
+          firstItem.product && firstItem.product.discounts && firstItem.product.discounts[0]
+            ? firstItem.product.discounts[0].name
+            : '-'
+        )
+        setCartId(firstItem.id);
+      } else {
+        setDiscount('-');
+        setCartId(0);
+      }
     } catch (error) {
       console.log(error.message);
     }
   };
 
-  const removeFromCart = async () => {
+  const removeFromCart = async (cartItemId) => {
     //remove from cart function
     try {
-      const url = process.env.REACT_APP_API_DELETE_CART.replace(':cartId', cartId)
-      await axios.delete(url);
+      const url = process.env.REACT_APP_API_DELETE_CART.replace(':cartId', cartItemId)
+      await axios.delete(url, {
+        headers: {
+          token: localStorage.getItem('token')
+        }
+      });
       getCart();
-      window.location.reload();
     } catch (error) {
       console.log(error.message);
     }
@@ -52,7 +64,11 @@ export default function Cart() {
     //update cart automatically updates qty
     try {
       const url = process.env.REACT_APP_API_UPDATE_QTY.replace(':id', id).replace(':option', option)
-      await axios.get(url);
+      await axios.get(url, {
+        headers: {
+          token: localStorage.getItem('token')
+        }
+      });
       getCart();
     } catch (error) {
       console.log(error.message);
@@ -105,7 +121,7 @@ export default function Cart() {
                       </div>
                     </td>
                     <td>
-                      <button onClick={removeFromCart}>
+                      <button onClick={() => removeFromCart(value.id)}>
                         <AiFillDelete />
                       </button>
                     </td>

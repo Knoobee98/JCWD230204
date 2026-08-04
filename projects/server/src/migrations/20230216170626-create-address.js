@@ -9,6 +9,9 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      user_id: {
+        type: Sequelize.UUID
+      },
       address: {
         type: Sequelize.STRING
       },
@@ -21,7 +24,7 @@ module.exports = {
       postal_code: {
         type: Sequelize.STRING
       },
-      langitude: {
+      latitude: {
         type: Sequelize.STRING
       },
       longitude: {

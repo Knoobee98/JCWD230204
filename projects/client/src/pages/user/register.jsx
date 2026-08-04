@@ -24,9 +24,9 @@ export default function Register (){
              setTimeout(()=> {
                 Navigate("/user/login")
              }, 2000)
-        } catch (data) {
-            console.log(data.data.message);
-            toast.error (data.data.message);     
+        } catch (error) {
+            console.log(error);
+            toast.error (error.response?.data?.message || error.message);     
         }
     }; 
 

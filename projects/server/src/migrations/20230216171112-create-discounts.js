@@ -18,8 +18,14 @@ module.exports = {
       type: {
         type: Sequelize.STRING
       },
-      exppiry_date: {
+      expiry_date: {
         type: Sequelize.DATE
+      },
+      admin_id: {
+        type: Sequelize.INTEGER
+      },
+      product_id: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
