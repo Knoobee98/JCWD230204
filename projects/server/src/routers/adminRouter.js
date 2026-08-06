@@ -20,5 +20,11 @@ router.post('/createDiscount/:admin_id?', tokenVerify, requireRole(ADMIN_ROLES),
 router.get('/getDiscounts', tokenVerify, requireRole(ADMIN_ROLES), adminController.getDiscounts)
 router.post('/uploadProductImage', tokenVerify, requireRole(ADMIN_ROLES), uploadProducts, adminController.uploadProductImage)
 router.post('/checkStatus', tokenVerify, requireRole(ADMIN_ROLES), adminController.checkStatus)
+router.get('/getUsers', tokenVerify, requireRole(ADMIN_ROLES), adminController.getAllUsers)
+router.post('/createUser', tokenVerify, requireRole(ADMIN_ROLES), adminController.createUser)
+router.patch('/updateUser/:id', tokenVerify, requireRole(ADMIN_ROLES), adminController.updateUser)
+router.delete('/deleteUser/:id', tokenVerify, requireRole(ADMIN_ROLES), adminController.deleteUser)
+router.get('/getSettings', tokenVerify, requireRole(ADMIN_ROLES), adminController.getSettings)
+router.post('/saveSettings', tokenVerify, requireRole(ADMIN_ROLES), adminController.saveSettings)
 
 module.exports = router;

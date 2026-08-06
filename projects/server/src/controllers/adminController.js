@@ -17,6 +17,8 @@ const branchProducts = db.branch_products;
 const stockHistory = db.stock_history;
 const transaction = db.transactions;
 const discount = db.discounts;
+const profiles = db.profiles;
+const settings = db.settings;
 
 // import hash
 const {hashPassword, hashMatch} = require('./../lib/hash')
@@ -746,6 +748,304 @@ module.exports = {
                 data: null
             })
             
+        }
+    },
+
+    getAllUsers: async(req, res) => {
+        try {
+            const findUsers = await users.findAll({
+                attributes: ['id', 'username', 'email', 'phone_number', 'status', 'createdAt'],
+                include: [{
+                    model: profiles,
+                    attributes: ['name', 'gender', 'birthdate', 'profile_pic_url']
+                }],
+                order: [['createdAt', 'DESC']]
+            })
+
+            const counts = await db.transactions.findAll({
+                attributes: ['user_id', [sequelize.fn('COUNT', sequelize.col('id')), 'count']],
+                group: ['user_id'],
+                raw: true
+            })
+            const countMap = {}
+            counts.forEach((c) => { countMap[c.user_id] = Number(c.count) })
+
+            const data = findUsers.map((u) => {
+                const json = u.toJSON()
+                json.transaction_count = countMap[json.id] || 0
+                return json
+            })
+
+            res.status(200).send({
+                isError: false,
+                message: "Get Users Success",
+                data,
+            })
+        } catch (error) {
+            console.error("getAllUsers error:", error)
+            res.status(404).send({
+                isError: true,
+                message: "Get Users Failed",
+                data: null,
+            })
+        }
+    },
+
+    createUser: async(req, res) => {
+        try {
+            const { username, email, password, name, phone_number } = req.body;
+
+            if (!username || !email || !password) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "username, email and password are required",
+                    data: null,
+                })
+            }
+
+            const findEmail = await users.findOne({
+                where: { email }
+            })
+
+            if (findEmail) {
+                return res.status(404).send({
+                    isError: true,
+                    message: "Email already exist",
+                    data: null,
+                })
+            }
+
+            const createUsers = await users.create({
+                username: username,
+                email: email,
+                password: await hashPassword(password),
+                phone_number: phone_number || '',
+                status: 'Confirmed',
+            })
+
+            await profiles.create({
+                user_id: createUsers.id,
+                name: name || username,
+            })
+
+            res.status(200).send({
+                isError: false,
+                message: "Create User Success",
+                data: null,
+            })
+        } catch (error) {
+            console.error("createUser error:", error)
+            res.status(404).send({
+                isError: true,
+                message: "Create User Failed",
+                data: null,
+            })
+        }
+    },
+
+    updateUser: async(req, res) => {
+        try {
+            const { id } = req.params;
+            const { username, email, phone_number, status, name, gender, birthdate } = req.body;
+
+            const findUser = await users.findOne({
+                where: { id }
+            })
+
+            if (!findUser) {
+                return res.status(404).send({
+                    isError: true,
+                    message: "User not found",
+                    data: null,
+                })
+            }
+
+            await users.update({
+                username: username,
+                email: email,
+                phone_number: phone_number,
+                status: status,
+            }, {
+                where: { id }
+            })
+
+            const findProfile = await profiles.findOne({
+                where: { user_id: id }
+            })
+
+            if (findProfile) {
+                await profiles.update({
+                    name: name,
+                    gender: gender,
+                    birthdate: birthdate,
+                }, {
+                    where: { user_id: id }
+                })
+            } else {
+                await profiles.create({
+                    user_id: id,
+                    name: name,
+                    gender: gender,
+                    birthdate: birthdate,
+                })
+            }
+
+            res.status(200).send({
+                isError: false,
+                message: "Update User Success",
+                data: null,
+            })
+        } catch (error) {
+            console.error("updateUser error:", error)
+            res.status(404).send({
+                isError: true,
+                message: "Update User Failed",
+                data: null,
+            })
+        }
+    },
+
+    deleteUser: async(req, res) => {
+        const t = await sequelize.transaction()
+        try {
+            const { id } = req.params;
+
+            const findUser = await users.findOne({
+                where: { id }
+            })
+
+            if (!findUser) {
+                return res.status(404).send({
+                    isError: true,
+                    message: "User not found",
+                    data: null,
+                })
+            }
+
+            await profiles.destroy({
+                where: { user_id: id },
+                transaction: t
+            })
+
+            await db.carts.destroy({
+                where: { user_id: id },
+                transaction: t
+            })
+
+            await db.address.destroy({
+                where: { user_id: id },
+                transaction: t
+            })
+
+            await db.wishlists.destroy({
+                where: { user_id: id },
+                transaction: t
+            })
+
+            const userTransactions = await db.transactions.findAll({
+                attributes: ['id'],
+                where: { user_id: id },
+                transaction: t
+            })
+            const transactionIds = userTransactions.map((tr) => tr.id)
+
+            if (transactionIds.length) {
+                await db.transactions_log.destroy({
+                    where: { transaction_id: transactionIds },
+                    transaction: t
+                })
+                await db.transactions_details.destroy({
+                    where: { transaction_id: transactionIds },
+                    transaction: t
+                })
+                await db.transactions.destroy({
+                    where: { id: transactionIds },
+                    transaction: t
+                })
+            }
+
+            await users.destroy({
+                where: { id },
+                transaction: t
+            })
+
+            await t.commit()
+
+            res.status(200).send({
+                isError: false,
+                message: "Delete User Success",
+                data: null,
+            })
+        } catch (error) {
+            await t.rollback()
+            console.error("deleteUser error:", error)
+            res.status(404).send({
+                isError: true,
+                message: "Delete User Failed",
+                data: null,
+            })
+        }
+    },
+
+    getSettings: async(req, res) => {
+        try {
+            const foundSettings = await settings.findAll({
+                attributes: ['key', 'value']
+            })
+
+            const result = {}
+            foundSettings.forEach((s) => {
+                result[s.key] = s.value
+            })
+
+            res.status(200).send({
+                isError: false,
+                message: "Get Settings Success",
+                data: result,
+            })
+        } catch (error) {
+            console.error("getSettings error:", error)
+            res.status(404).send({
+                isError: true,
+                message: "Get Settings Failed",
+                data: null,
+            })
+        }
+    },
+
+    saveSettings: async(req, res) => {
+        try {
+            const data = req.body;
+
+            if (!data || typeof data !== 'object') {
+                return res.status(400).send({
+                    isError: true,
+                    message: "Settings payload is required",
+                    data: null,
+                })
+            }
+
+            const rows = Object.keys(data).map((key) => ({
+                key: key,
+                value: data[key],
+            }))
+
+            await settings.bulkCreate(rows, {
+                updateOnDuplicate: ['value', 'updatedAt'],
+            })
+
+            res.status(200).send({
+                isError: false,
+                message: "Save Settings Success",
+                data: null,
+            })
+        } catch (error) {
+            console.error("saveSettings error:", error)
+            res.status(404).send({
+                isError: true,
+                message: "Save Settings Failed",
+                data: null,
+            })
         }
     }
 };

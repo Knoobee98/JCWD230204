@@ -20,6 +20,16 @@ function Shop() {
     branch_id: '',
   });
 
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [editForm, setEditForm] = useState({
+    product_id: '',
+    product_name: '',
+    product_desc: '',
+    product_category: '',
+    product_price: '',
+    product_stock: '',
+  });
+
   const fetchProducts = async () => {
     try {
       const response = await api.get('/api/admin/getProducts');
@@ -66,6 +76,41 @@ function Shop() {
       fetchProducts();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to delete product');
+    }
+  };
+
+  const handleEditOpen = (product) => {
+    setEditForm({
+      product_id: product.id,
+      product_name: product.products_name || '',
+      product_desc: product.products_details?.[0]?.desc || '',
+      product_category: product.category?.category || '',
+      product_price: product.products_details?.[0]?.price || '',
+      product_stock: product.branch_products?.[0]?.stock || '',
+    });
+    setEditingProduct(product);
+  };
+
+  const handleEditChange = (e) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/api/admin/updateProduct', {
+        product_id: editForm.product_id,
+        product_name: editForm.product_name,
+        product_desc: editForm.product_desc,
+        product_category: editForm.product_category,
+        product_price: editForm.product_price,
+        product_stock: editForm.product_stock,
+      });
+      toast.success('Product updated');
+      setEditingProduct(null);
+      fetchProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update product');
     }
   };
 
@@ -183,7 +228,13 @@ function Shop() {
                             <div className="text-right text-slate-700">{totalStock}</div>
                           </td>
                           <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                            <div className="text-right">
+                            <div className="text-right space-x-3">
+                              <button
+                                onClick={() => handleEditOpen(product)}
+                                className="text-xs font-medium text-indigo-600 hover:text-indigo-800"
+                              >
+                                Edit
+                              </button>
                               <button
                                 onClick={() => handleDelete(product.id)}
                                 className="text-xs font-medium text-rose-600 hover:text-rose-800"
@@ -202,6 +253,49 @@ function Shop() {
 
           </div>
         </main>
+
+        {/* Edit product modal */}
+        {editingProduct && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 bg-slate-900 bg-opacity-50" onClick={() => setEditingProduct(null)} />
+            <div className="relative bg-white rounded-sm shadow-xl w-full max-w-2xl">
+              <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+                <h2 className="text-lg text-slate-800 font-bold">Edit Product</h2>
+                <button onClick={() => setEditingProduct(null)} className="text-slate-400 hover:text-slate-600">
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth="2" fill="none" /></svg>
+                </button>
+              </div>
+              <form onSubmit={handleUpdate} className="px-6 py-4 grid grid-cols-12 gap-4">
+                <div className="col-span-12 sm:col-span-6">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Product Name</label>
+                  <input name="product_name" value={editForm.product_name} onChange={handleEditChange} className="form-input w-full" required />
+                </div>
+                <div className="col-span-12 sm:col-span-6">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Category</label>
+                  <input name="product_category" value={editForm.product_category} onChange={handleEditChange} className="form-input w-full" required />
+                </div>
+                <div className="col-span-12">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Description</label>
+                  <textarea name="product_desc" value={editForm.product_desc} onChange={handleEditChange} className="form-textarea w-full" rows="2" required />
+                </div>
+                <div className="col-span-12 sm:col-span-6">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Price</label>
+                  <input name="product_price" type="number" value={editForm.product_price} onChange={handleEditChange} className="form-input w-full" required />
+                </div>
+                <div className="col-span-12 sm:col-span-6">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Stock</label>
+                  <input name="product_stock" type="number" value={editForm.product_stock} onChange={handleEditChange} className="form-input w-full" required />
+                </div>
+                <div className="col-span-12 flex justify-end gap-2">
+                  <button type="button" onClick={() => setEditingProduct(null)} className="btn bg-white hover:bg-slate-50 text-slate-700 border border-slate-200">
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn bg-indigo-500 hover:bg-indigo-600 text-white">Save Changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
       </div>
 

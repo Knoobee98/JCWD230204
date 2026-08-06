@@ -39,6 +39,7 @@ import CustomerTransactions from "./pages/admin/customers"
 import OrderTransactions from "./pages/admin/orders"
 import InvoicesTransactions from "./pages/admin/invoices"
 import Discount from "./pages/admin/discount";
+import Settings from "./pages/admin/settings";
 // static 404
 import NotFound from "./pages/notfound";
 // maintenance
@@ -93,6 +94,7 @@ useEffect(() => {
         <Route path="/admin/orders" element={<RequireAuth admin><OrderTransactions /></RequireAuth>} />
         <Route path="/admin/invoices" element={<RequireAuth admin><InvoicesTransactions /></RequireAuth>} />
         <Route path="/admin/discount" element={<RequireAuth admin><Discount /></RequireAuth>} />
+        <Route path="/admin/settings" element={<RequireAuth admin><Settings /></RequireAuth>} />
 
         <Route path="*" element={<NotFound />} />
 
