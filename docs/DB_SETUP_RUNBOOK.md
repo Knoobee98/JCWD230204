@@ -40,6 +40,15 @@ For **local seeding**, set these as environment variables (or in `projects/serve
 
 ```ini
 DB_DIALECT=postgres
+DB_URL=postgresql://<db user>:<password>@ep-xxxx-yyyy.eu-central-1.aws.neon.tech:5432/<db name>?sslmode=require&channel_binding=require
+DB_PORT=5432
+DB_SSL=true
+```
+
+> 💡 `DB_URL` works here too — same value as you'll set on Render. The split keys below are an equivalent fallback (`config.js` prefers `DB_URL` when both are set):
+
+```ini
+DB_DIALECT=postgres
 DB_USERNAME=<db user>
 DB_PASSWORD=<password>
 DB_NAME=neondb
@@ -60,6 +69,24 @@ On **Render**, set the same keys in the web service's **Environment** section (R
 | Root directory | `/` |
 
 > ⚠️ `--include=dev` is required: Render sets `NODE_ENV=production`, which makes plain `npm install` skip devDependencies — and `react-scripts build` (via lerna `npm run build`) needs them (babel/webpack). Environment variables for the DB go in Render → your service → **Environment** (see Step 2).
+
+### Render environment variables
+
+| Key | Value |
+|---|---|
+| `DB_DIALECT` | `postgres` |
+| `DB_URL` | `postgresql://<db user>:<password>@<host>:5432/<db name>?sslmode=require&channel_binding=require` (the Neon connection string; `config.js` parses it) |
+| `DB_PORT` | `5432` |
+| `DB_SSL` | `true` |
+| `JWT_SECRET` | a long random string (**required** — startup crashes if missing in production) |
+| `CLIENT_BASE_URL` | `https://gamepedia-v2.onrender.com` |
+| `CORS_ORIGINS` | `https://gamepedia-v2.onrender.com` |
+| `EMAIL_USER` | your Gmail address |
+| `EMAIL_PASS` | your Gmail app password |
+
+Alternatively, set a single `DB_URL` connection string instead of the split keys — `config.js` parses it via `pg-connection-string` and falls back to the individual keys when `DB_URL` is absent.
+
+`RAJAONGKIR_API_KEY` and `OPENCAGE_API_KEY` can be left empty for the demo (their features just return errors). Note the client build also bakes in `REACT_APP_MAINTENANCE` from `projects/client/.env.production`; set it to `false` when ready to show the real app instead of the maintenance screen.
 
 ## Step 3 — Create the schema (migrations)
 
