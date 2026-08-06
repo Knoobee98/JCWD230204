@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../utils/api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect} from "react";
 import NavbarUser from "../../components/navbaruser";
@@ -13,7 +13,7 @@ export default function Activation(){
     const confirm = async() => {
         try {
             const userId = Location.pathname.split('/').pop();
-            await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/api/users/activation/${userId}`, {id: userId})
+            await api.patch(`${process.env.REACT_APP_API_BASE_URL}/api/users/activation/${userId}`, {id: userId})
             setTimeout(()=> {
                 Navigate("/user/login")
             }, 3000)

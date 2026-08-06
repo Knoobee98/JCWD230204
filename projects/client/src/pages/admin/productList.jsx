@@ -1,17 +1,73 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 
 import Sidebar from '../../partials/Sidebar';
 import Header from '../../partials/Header';
-import ShopCards01 from '../../partials/inventory/ShopCards01';
-import ShopCards02 from '../../partials/inventory/ShopCards02';
-import ShopCards03 from '../../partials/inventory/ShopCards03';
-import ShopCards04 from '../../partials/inventory/ShopCards04';
-import ShopCards05 from '../../partials/inventory/ShopCards05';
-import ShopCards06 from '../../partials/inventory/ShopCards06';
+import api from '../../utils/api';
 
 function Shop() {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [form, setForm] = useState({
+    product_name: '',
+    product_desc: '',
+    product_category: '',
+    product_price: '',
+    product_stock: '',
+    branch_id: '',
+  });
+
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get('/api/admin/getProducts');
+      setProducts(response.data.data || []);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/api/admin/createProduct', {
+        product_name: form.product_name,
+        product_desc: form.product_desc,
+        product_category: form.product_category,
+        product_price: form.product_price,
+        product_stock: form.product_stock,
+        branch_id: form.branch_id,
+      });
+      toast.success('Product created');
+      setForm({ product_name: '', product_desc: '', product_category: '', product_price: '', product_stock: '', branch_id: '' });
+      fetchProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create product');
+    }
+  };
+
+  const handleDelete = async (productId) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+    try {
+      await api.post('/api/admin/deleteProduct', { product_id: productId });
+      toast.success('Product deleted');
+      fetchProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete product');
+    }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -30,98 +86,118 @@ function Shop() {
 
             {/* Page header */}
             <div className="mb-5">
-
-              {/* Title */}
-              <h1 className="text-2xl md:text-3xl text-slate-800 font-bold">Find the right product for you ✨</h1>
-
+              <h1 className="text-2xl md:text-3xl text-slate-800 font-bold">Product Management</h1>
             </div>
 
-            {/* Search form */}
-            <div className="max-w-xl mb-5">
-              <form className="relative">
-                <label htmlFor="app-search" className="sr-only">Search</label>
-                <input id="app-search" className="form-input w-full pl-9 py-3 focus:border-slate-300" type="search" placeholder="Search…" />
-                <button className="absolute inset-0 right-auto group" type="submit" aria-label="Search">
-                  <svg className="w-4 h-4 shrink-0 fill-current text-slate-400 group-hover:text-slate-500 ml-3 mr-2" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 14c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7zM7 2C4.243 2 2 4.243 2 7s2.243 5 5 5 5-2.243 5-5-2.243-5-5-5z" />
-                    <path d="M15.707 14.293L13.314 11.9a8.019 8.019 0 01-1.414 1.414l2.393 2.393a.997.997 0 001.414 0 .999.999 0 000-1.414z" />
-                  </svg>
-                </button>
+            {/* Create product form */}
+            <div className="mb-8 bg-white border border-slate-200 rounded-sm shadow-sm p-6">
+              <h2 className="text-lg text-slate-800 font-bold mb-4">Add New Product</h2>
+              <form onSubmit={handleCreate} className="grid grid-cols-12 gap-4">
+                <div className="col-span-12 sm:col-span-6">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Product Name</label>
+                  <input name="product_name" value={form.product_name} onChange={handleChange} className="form-input w-full" required />
+                </div>
+                <div className="col-span-12 sm:col-span-6">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Category</label>
+                  <input name="product_category" value={form.product_category} onChange={handleChange} className="form-input w-full" placeholder="e.g. PlayStation 5" required />
+                </div>
+                <div className="col-span-12">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Description</label>
+                  <textarea name="product_desc" value={form.product_desc} onChange={handleChange} className="form-textarea w-full" rows="2" required />
+                </div>
+                <div className="col-span-12 sm:col-span-4">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Price</label>
+                  <input name="product_price" type="number" value={form.product_price} onChange={handleChange} className="form-input w-full" required />
+                </div>
+                <div className="col-span-12 sm:col-span-4">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Stock</label>
+                  <input name="product_stock" type="number" value={form.product_stock} onChange={handleChange} className="form-input w-full" required />
+                </div>
+                <div className="col-span-12 sm:col-span-4">
+                  <label className="block text-sm font-medium text-slate-600 mb-1">Branch ID</label>
+                  <input name="branch_id" type="number" value={form.branch_id} onChange={handleChange} className="form-input w-full" required />
+                </div>
+                <div className="col-span-12">
+                  <button type="submit" className="btn bg-indigo-500 hover:bg-indigo-600 text-white">Create Product</button>
+                </div>
               </form>
             </div>
 
-            {/* Filters */}
-            <div className="mb-4 border-b border-slate-200">
-              <ul className="text-sm font-medium flex flex-nowrap -mx-4 sm:-mx-6 lg:-mx-8 overflow-x-scroll no-scrollbar">
-                <li className="pb-3 mr-6 last:mr-0 first:pl-4 sm:first:pl-6 lg:first:pl-8 last:pr-4 sm:last:pr-6 lg:last:pr-8">
-                  <a className="text-indigo-500 whitespace-nowrap" href="#0">View All</a>
-                </li>
-                <li className="pb-3 mr-6 last:mr-0 first:pl-4 sm:first:pl-6 lg:first:pl-8 last:pr-4 sm:last:pr-6 lg:last:pr-8">
-                  <a className="text-slate-500 hover:text-slate-600 whitespace-nowrap" href="#0">Courses</a>
-                </li>
-                <li className="pb-3 mr-6 last:mr-0 first:pl-4 sm:first:pl-6 lg:first:pl-8 last:pr-4 sm:last:pr-6 lg:last:pr-8">
-                  <a className="text-slate-500 hover:text-slate-600 whitespace-nowrap" href="#0">Digital Goods</a>
-                </li>
-                <li className="pb-3 mr-6 last:mr-0 first:pl-4 sm:first:pl-6 lg:first:pl-8 last:pr-4 sm:last:pr-6 lg:last:pr-8">
-                  <a className="text-slate-500 hover:text-slate-600 whitespace-nowrap" href="#0">Online Events</a>
-                </li>
-                <li className="pb-3 mr-6 last:mr-0 first:pl-4 sm:first:pl-6 lg:first:pl-8 last:pr-4 sm:last:pr-6 lg:last:pr-8">
-                  <a className="text-slate-500 hover:text-slate-600 whitespace-nowrap" href="#0">Crowdfunding</a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Page content */}
-            <div>
-
-              {/* Cards 1 (Video Courses) */}
-              <div className="mt-8">
-                <h2 className="text-xl leading-snug text-slate-800 font-bold mb-5">Video Courses</h2>
-                <div className="grid grid-cols-12 gap-6">
-                  <ShopCards01 />
-                </div>
+            {/* Product list */}
+            <div className="bg-white border border-slate-200 rounded-sm shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="table-auto w-full">
+                  <thead className="text-xs font-semibold uppercase text-slate-500 border-t border-b border-slate-200">
+                    <tr>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-left">Product</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-left">Category</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-right">Price</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-right">Total Stock</div>
+                      </th>
+                      <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                        <div className="font-semibold text-right">Actions</div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-sm divide-y divide-slate-200 border-b border-slate-200">
+                    {loading ? (
+                      <tr><td colSpan="5" className="px-2 py-8 text-center text-slate-400">Loading products...</td></tr>
+                    ) : products.length === 0 ? (
+                      <tr><td colSpan="5" className="px-2 py-8 text-center text-slate-400">No products found</td></tr>
+                    ) : products.map((product) => {
+                      const totalStock = Array.isArray(product.branch_products)
+                        ? product.branch_products.reduce((sum, bp) => sum + (Number(bp.stock) || 0), 0)
+                        : 0;
+                      return (
+                        <tr key={product.id}>
+                          <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                            <div className="flex items-center">
+                              {product.products_images && product.products_images[0] && (
+                                <img
+                                  className="w-10 h-10 rounded object-cover mr-3"
+                                  src={`${process.env.REACT_APP_API_BASE_URL}/Public/${product.products_images[0].url}`}
+                                  alt={product.products_name}
+                                />
+                              )}
+                              <div className="font-medium text-slate-800">{product.products_name}</div>
+                            </div>
+                          </td>
+                          <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                            <div className="text-slate-600">{product.category?.category || '-'}</div>
+                          </td>
+                          <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                            <div className="text-right font-medium text-slate-700">
+                              {product.products_details && product.products_details[0]
+                                ? `Rp.${Number(product.products_details[0].price).toLocaleString('id-ID')}`
+                                : '-'}
+                            </div>
+                          </td>
+                          <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                            <div className="text-right text-slate-700">{totalStock}</div>
+                          </td>
+                          <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                            <div className="text-right">
+                              <button
+                                onClick={() => handleDelete(product.id)}
+                                className="text-xs font-medium text-rose-600 hover:text-rose-800"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-
-              {/* Cards 2 (Digital Goods) */}
-              <div className="mt-8">
-                <h2 className="text-xl leading-snug text-slate-800 font-bold mb-5">Digital Goods</h2>
-                <div className="grid grid-cols-12 gap-6">
-                  <ShopCards02 />
-                </div>
-              </div>
-
-              {/* Cards 3 (Online Events) */}
-              <div className="mt-8">
-                <h2 className="text-xl leading-snug text-slate-800 font-bold mb-5">Online Events</h2>
-                <div className="grid grid-cols-12 gap-6">
-                  <ShopCards03 />
-                </div>
-              </div>
-
-              {/* Cards 4 (Crowdfunding) */}
-              <div className="mt-8">
-                <h2 className="text-xl leading-snug text-slate-800 font-bold mb-5">Crowdfunding</h2>
-                <div className="grid grid-cols-12 gap-6">
-                  <ShopCards04 />
-                </div>
-              </div>
-
-              {/* Cards 5 (Popular Categories) */}
-              <div className="mt-8">
-                <h2 className="text-xl leading-snug text-slate-800 font-bold mb-5">Popular Categories</h2>
-                <div className="grid grid-cols-12 gap-6">
-                  <ShopCards05 />
-                </div>
-              </div>
-
-              {/* Cards 6 (Trending Now) */}
-              <div className="mt-8">
-                <h2 className="text-xl leading-snug text-slate-800 font-bold mb-5">Trending Now</h2>
-                <div className="grid grid-cols-12 gap-6">
-                  <ShopCards06 />
-                </div>
-              </div>
-
             </div>
 
           </div>

@@ -1,4 +1,4 @@
-import axios from 'axios'
+import api from '../../utils/api'
 import {useState, useEffect} from 'react'
 import {Link, useParams} from 'react-router-dom'
 import {toast} from 'react-hot-toast'
@@ -16,7 +16,7 @@ export default function ProductDetails(){
     const getProducts = async() => {
         try {
             const url = process.env.REACT_APP_API_GET_PRODUCTS_DETAIL.replace(":id", id)
-            const response = await axios.get(url)
+            const response = await api.get(url)
             console.log(response.data.data)
             setProduct(response.data.data)
         } catch (error) {
@@ -26,7 +26,7 @@ export default function ProductDetails(){
 
     const getCategory = async() => {
         try{
-            const response = await axios.get(process.env.REACT_APP_API_GET_CATEGORY)
+            const response = await api.get(process.env.REACT_APP_API_GET_CATEGORY)
             setCategory(response.data.data)
         } catch(error){
             console.log(error.message)
@@ -48,7 +48,7 @@ export default function ProductDetails(){
             console.log(quantity)
             const token = localStorage.getItem("token")
             const url = process.env.REACT_APP_API_ADD_TO_CART.replace(":id", id).replace(":quantity", parseInt(quantity));
-            const response = await axios.get(url, {
+            const response = await api.get(url, {
                 headers: { token }
             })
             toast.success(response.data.message)

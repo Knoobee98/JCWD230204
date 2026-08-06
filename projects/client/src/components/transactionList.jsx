@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom'
 import moment from 'moment';
 
@@ -19,7 +19,7 @@ export default function TransactionList() {
 
     const getTransactionList = async() => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/get?sortBy=${sortBy}&sortType=${sortType}`, {
+            const response = await api.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/get?sortBy=${sortBy}&sortType=${sortType}`, {
                 headers: {
                     token: localStorage.getItem('token')
                 }
@@ -44,7 +44,7 @@ export default function TransactionList() {
 
     const confirmOrder = async(id) => {
         try {
-            await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/confirmOrder?id=${id}`, {
+            await api.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/confirmOrder?id=${id}`, {
                 headers: {token: localStorage.getItem('token')}
             })
         } catch (error) {
@@ -61,7 +61,7 @@ export default function TransactionList() {
 
     const sortByHandler = async(e) => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/get?sortBy=${sortBy}&sortType=${sortType}`, {
+            const response = await api.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/get?sortBy=${sortBy}&sortType=${sortType}`, {
                 headers: {
                     token: localStorage.getItem('token')
                 }
@@ -75,7 +75,7 @@ export default function TransactionList() {
     const filterHandler = async() => {
         const searchInput = search.current.value
         try {
-            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/get?filterBy=${filterBy}&search=${searchInput}`, {
+            const response = await api.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/get?filterBy=${filterBy}&search=${searchInput}`, {
                 headers: {
                     token: localStorage.getItem('token')
                 }
@@ -91,7 +91,7 @@ export default function TransactionList() {
             console.log(startDate, endDate)
             moment(startDate).format('YYYY-MM-DD')
             moment(endDate).format('YYYY-MM-DD')
-            const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/get?filterBy=${filterBy}&startDate=${startDate}&endDate=${endDate}`, {
+            const response = await api.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/get?filterBy=${filterBy}&startDate=${startDate}&endDate=${endDate}`, {
                 headers: {
                     token: localStorage.getItem('token')
                 }

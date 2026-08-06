@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../../utils/api';
 import { useRef, useState } from "react";
 import toast, { Toaster } from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
@@ -17,7 +17,7 @@ export default function ForgotPassword(){
 	let onForgotPassword = async () => {
 		try {
 			setDisabled(true);
-			let response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/users/forgot-password`,
+			let response = await api.post(`${process.env.REACT_APP_API_BASE_URL}/api/users/forgot-password`,
 				{ email: email.current.value }
 			);
 			toast.success(response.data.message);

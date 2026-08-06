@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../utils/api";
 import { useRef, useState } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -32,7 +32,7 @@ export default function ChangePassword (){
 
 			setDisabled(true);
 
-			let data = await axios.patch(
+			let data = await api.patch(
 				`${process.env.REACT_APP_API_BASE_URL}/api/users/change-password`,
 				{ password: password.current.value, newPassword: newPassword.current.value, confirmPassword: confirmPassword.current.value },
                 { headers: {

@@ -10,10 +10,8 @@ const discounts_categories = db.discount_category;
 const discount = db.discounts;
 const transactions = db.transactions;
 const transactions_details = db.transactions_details;
-const stock_history = db.stock_history;
 const cart = db.carts;
 const users = db.users;
-const wishlist = db.wishlists;;
 
 const {Op} = require('sequelize');
 
@@ -82,7 +80,15 @@ module.exports = {
     getProductDetail: async(req, res) => {
         try{
             const {id} = req.query
-            console.log(id)
+
+            if (!id) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "product id is required",
+                    data: null
+                })
+            }
+
             let findProductDetail = await products.findAll({
                 attributes: ['id', 'products_name'],
                 include: [
@@ -287,6 +293,14 @@ module.exports = {
         const {product_id, quantity} = req.query
 
         try {
+            if (!product_id || !quantity || parseInt(quantity) < 1) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "product_id and a positive quantity are required",
+                    data: null
+                })
+            }
+
             const id = req.uid.id
 
             const findUser = await users.findOne({
@@ -351,7 +365,14 @@ module.exports = {
         try {
             const {id} = req.query
             const user_id = req.uid.id
-            console.log(id)
+
+            if (!id) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "cart id is required",
+                    data: null
+                })
+            }
 
             //validasi data cart
             await cart.destroy({
@@ -382,6 +403,14 @@ module.exports = {
         const user_id = req.uid.id
         
         try {
+            if (!id || !option) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "cart id and option are required",
+                    data: null
+                })
+            }
+
             const findItem = await cart.findOne({
                 where: {
                     id,
@@ -445,168 +474,6 @@ module.exports = {
             res.status(400).send({
                 isError: true,
                 message: "update cart failed",
-                data: error.message
-            })
-        }
-    },
-
-    stockHistory: async(req, res) => {
-        try {
-            const findStockHistory = await stock_history.findAll({
-                attributes: ['id', 'event_type', 'quantity_changed', 'remaining_quantity', 'product_id']
-            })
-
-            if(!findStockHistory){
-                res.status(400).send({
-                    isError: true,
-                    message: "stock history not found",
-                    data: {}
-                })
-            }
-
-            res.status(200).send({
-                isError: false,
-                message: "stock history found",
-                data: findStockHistory
-            })
-
-        } catch (error) {
-            res.status(400).send({
-                isError: true,
-                message: "get data failed",
-                data: error.message
-            })
-        }
-    },
-
-    addWishlist: async(req, res) => {
-        const {product_id} = req.query
-        const userid = req.uid.id
-        
-        try {
-            const findUser = await users.findOne({
-                where: {
-                    id: userid
-                }
-            })
-
-            if(!findUser){
-                return res.status(400).send({
-                    isError: true,
-                    message: "user not found",
-                    data: null
-                })
-            } 
-
-            if(findUser.status === "unconfirmed"){
-                return res.status(400).send({
-                    isError: true,
-                    message: "user not confirmed, please confirmed your email",
-                    data: null
-                })
-            }
-
-            const findWishlist = await wishlist.findOne({
-                where: {
-                    user_id: userid,
-                    product_id
-                }
-            })
-
-            if(findWishlist){
-                return res.status(400).send({
-                    isError: true,
-                    message: "product already in wishlist",
-                    data: null
-                })
-            }
-
-            await wishlist.create({
-                product_id: product_id,
-                user_id: userid
-            })
-
-            res.status(200).send({
-                isError: false,
-                message: "add wishlist success",
-                data: null
-            })
-
-        } catch (error) {
-            res.status(500).send({
-                isError: true,
-                message: "add wishlist failed",
-                data: error.message
-            })
-        }
-    },
-
-    getWishlists: async(req, res) => {
-        const userid = req.uid.id
-
-        try {
-            const findUser = await users.findOne({
-                where: {
-                    id: userid
-                }
-            })
-
-            if(!findUser){
-                return res.status(400).send({
-                    isError: true,
-                    message: "user not found",
-                    data: null
-                })
-            }
-
-            const findWishlist = await wishlist.findAll({
-                include: [
-                    {model: products, attributes: ['products_name'],
-                include: [
-                    {model: products_detail, attributes: ['price']},
-                    {model: products_image, attributes: ['url']},
-                ]},
-                ],
-                where: {
-                    user_id: userid
-                }
-            })
-
-            res.status(200).send({
-                isError: false,
-                message: "get wishlist success",
-                data: findWishlist
-            })
-            
-        } catch (error) {
-            res.status(404).send({
-                isError: true,
-                message: "get wishlist failed",
-                data: error.message
-            })
-        }
-    },
-
-    deleteWishlist: async(req, res) => {
-        const {id} = req.query
-        const userid = req.uid.id
-        try {
-            await wishlist.destroy({
-                where: {
-                    id,
-                    user_id: userid
-                }
-            })
-
-            res.status(200).send({
-                isError: false,
-                message: "delete wishlist success",
-                data: null
-            })
-        } catch (error) {
-            res.status(404).send({
-                isError: true,
-                message: "delete wishlist failed",
                 data: error.message
             })
         }

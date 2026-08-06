@@ -1,161 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import Stocks from './pStocksTableItem'
-
-import Image01 from '../../images/fauzan.png'
-import Image02 from '../../images/man.png'
-import Image03 from '../../images/woman.png'
-
-import axios from 'axios'
+import { toast } from 'react-hot-toast';
+import api from '../../utils/api';
 
 function StocksTable({
   selectedItems
 }) {
 
-  const stocks = [
-    {
-      id: '0',
-      image: Image01,
-      order: '#123567',
-      date: '22/01/2021',
-      customer: 'Uchihaganteng',
-      total: 'Rp.1.290.000',
-      status: 'Refunded',
-      items: '1',
-      location: 'Jakarta', 
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '1',
-      image: Image01,
-      order: '#779912',
-      date: '22/01/2021',
-      customer: 'Yasuoggsekali',
-      total: 'Rp.890.000',
-      status: 'Approved',
-      items: '2',
-      location: 'Jakarta',
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '2',
-      image: Image02,
-      order: '#889924',
-      date: '22/01/2021',
-      customer: 'Janganboros',
-      total: 'Rp.890.000',
-      status: 'Approved',
-      items: '2',
-      location: 'Bogor',
-      type: 'One-time',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '3',
-      image: Image01,
-      order: '#897726',
-      date: '22/01/2021',
-      customer: 'Mainmulukapanbelajarnya',
-      total: 'Rp.590.000',
-      status: 'Pending',
-      items: '1',
-      location: 'Bogor',
-      type: 'One-time',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '4',
-      image: Image03,
-      order: '#123567',
-      date: '22/01/2021',
-      customer: 'Ahkamubisaaja',
-      total: 'Rp.390.000',
-      status: 'Refunded',
-      items: '1',
-      location: 'Bogor',
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '5',
-      image: Image01,
-      order: '#896644',
-      date: '21/01/2021',
-      customer: 'Maafsayakhilaf',
-      total: 'Rp.590.000',
-      status: 'Approved',
-      items: '1',
-      location: 'Jakarta',
-      type: 'One-time',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '6',
-      image: Image03,
-      order: '#136988',
-      date: '21/01/2021',
-      customer: 'Gayanomorsatu',
-      total: 'Rp.890.000',
-      status: 'Approved',
-      items: '1',
-      location: 'Tangerang Selatan',
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '7',
-      image: Image03,
-      order: '#442206',
-      date: '21/01/2021',
-      customer: 'Skillmembatu',
-      total: 'Rp.1.290.000',
-      status: 'Approved',
-      items: '2',
-      location: 'Tangerang Selatan',
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '8',
-      image: Image02,
-      order: '#764321',
-      date: '21/01/2021',
-      customer: 'Lulusinakuya',
-      total: 'Rp.890.000',
-      status: 'Pending',
-      items: '2',
-      location: 'Tangerang Selatan',
-      type: 'One-time',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '9',
-      image: Image01,
-      order: '#908764',
-      date: '21/01/2021',
-      customer: 'aamiinlulus',
-      total: 'Rp.590.000',
-      status: 'Refunded',
-      items: '1',
-      location: 'Jakarta',
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    }
-  ];
-  
-
   const [selectAll, setSelectAll] = useState(false);
   const [isCheck, setIsCheck] = useState([]);
   const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const getProductsStocks = async() => {
-    const response = await axios.get(``)
-  }
+  const fetchStocks = async () => {
+    try {
+      const response = await api.get('/api/admin/getBranchProducts');
+      setList(response.data.data || []);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load stocks');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setList(stocks);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchStocks();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSelectAll = () => {
@@ -177,13 +46,18 @@ function StocksTable({
 
   useEffect(() => {
     selectedItems(isCheck);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCheck]);
+
+  const totalStock = (product) => {
+    if (!Array.isArray(product.branch_products)) return 0;
+    return product.branch_products.reduce((sum, bp) => sum + (Number(bp.stock) || 0), 0);
+  };
 
   return (
     <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
       <header className="px-5 py-4">
-        <h2 className="font-semibold text-slate-800">All Stocks <span className="text-slate-400 font-medium">442</span></h2>
+        <h2 className="font-semibold text-slate-800">Product Stocks <span className="text-slate-400 font-medium">{list.length}</span></h2>
       </header>
       <div>
 
@@ -202,59 +76,71 @@ function StocksTable({
                   </div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">User Order</div>
+                  <div className="font-semibold text-left">Product</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Date</div>
+                  <div className="font-semibold text-left">Price</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Username</div>
+                  <div className="font-semibold text-left">Per-Branch Stock</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Total</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Status</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold">Items</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Branch</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Payment type</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <span className="sr-only">Menu</span>
+                  <div className="font-semibold text-right">Total</div>
                 </th>
               </tr>
             </thead>
-            {/* Table body */}
-            {
-              list.map(order => {
-                return (
-                  <Stocks
-                    key={order.id}
-                    id={order.id}
-                    image={order.image}
-                    order={order.order}
-                    date={order.date}
-                    customer={order.customer}
-                    total={order.total}
-                    status={order.status}
-                    items={order.items}
-                    location={order.location}
-                    type={order.type}
-                    description={order.description}
-                    handleClick={handleClick}
-                    isChecked={isCheck.includes(order.id)}
-                  />
-                )
-              })
-            }
+            <tbody className="text-sm divide-y divide-slate-200">
+              {loading ? (
+                <tr><td colSpan="5" className="px-2 py-8 text-center text-slate-400">Loading stocks...</td></tr>
+              ) : list.length === 0 ? (
+                <tr><td colSpan="5" className="px-2 py-8 text-center text-slate-400">No products found</td></tr>
+              ) : list.map((product) => (
+                <tr key={product.id}>
+                  <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-px">
+                    <div className="flex items-center">
+                      <label className="inline-flex">
+                        <span className="sr-only">Select</span>
+                        <input id={product.id} className="form-checkbox" type="checkbox" onChange={handleClick} checked={isCheck.includes(product.id)} />
+                      </label>
+                    </div>
+                  </td>
+                  <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {product.products_images && product.products_images[0] && (
+                        <img
+                          className="w-10 h-10 rounded object-cover mr-3"
+                          src={`${process.env.REACT_APP_API_BASE_URL}/Public/${product.products_images[0].url}`}
+                          alt={product.products_name}
+                        />
+                      )}
+                      <div className="font-medium text-slate-800">{product.products_name}</div>
+                    </div>
+                  </td>
+                  <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                    <div>
+                      {product.products_details && product.products_details[0]
+                        ? `Rp.${Number(product.products_details[0].price).toLocaleString('id-ID')}`
+                        : '-'}
+                    </div>
+                  </td>
+                  <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                    <div className="flex gap-2">
+                      {Array.isArray(product.branch_products) && product.branch_products.length
+                        ? product.branch_products.map((bp, index) => (
+                            <span key={index} className="inline-flex text-xs font-medium rounded-full px-2.5 py-1 bg-slate-100 text-slate-600">
+                              {bp.stock}
+                            </span>
+                          ))
+                        : '-'}
+                    </div>
+                  </td>
+                  <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                    <div className="text-right font-medium text-slate-700">{totalStock(product)}</div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
-
         </div>
       </div>
     </div>

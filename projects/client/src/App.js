@@ -1,9 +1,10 @@
-import { Routes, Route, useNavigate, useLocation} from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import "../src/css/App.css";
 import React, { useEffect } from 'react';
 import './css/style.css';
 import './charts/ChartjsConfig.jsx';
+import RequireAuth from "./components/RequireAuth";
 
 
 // userside
@@ -37,6 +38,7 @@ import Transactions from "./pages/admin/transactions"
 import CustomerTransactions from "./pages/admin/customers"
 import OrderTransactions from "./pages/admin/orders"
 import InvoicesTransactions from "./pages/admin/invoices"
+import Discount from "./pages/admin/discount";
 // static 404
 import NotFound from "./pages/notfound";
 
@@ -56,36 +58,36 @@ useEffect(() => {
       <Routes>
         {/* userside */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/user/editProfile" element={<EditProfile />} />
         <Route path="/user/register" element={<Register />} />
         <Route path="/activation/:id" element={<Activation />} />
         <Route path="/user/login" element={<Login />} />
-        <Route path="/user/Profile" element={<Profiling />} />
-        <Route path="/user/editProfile" element={<EditProfile />} />
         <Route path="/user/resetPassword/:id" element={<ResetPassword />} />
         <Route path="/user/forgotPassword" element={<ForgotPassword />} />
-        <Route path="/user/changePassword" element={<ChangePassword />} />
-        <Route path="/user/dashboard" element={<DashboardUsers />} />
         <Route path="/user/Products" element={<ProductsPage />} />
         <Route path="/user/Details/:id" element={<ProductsDetails />} />
-        <Route path="/user/cart" element={<Cart />} />
-        <Route path="/user/shipping" element={<ShippingPage />} />
-        <Route path="/user/uploadPayment/:id" element={<UploadPayment />} />
-        
+        <Route path="/user/Profile" element={<RequireAuth><Profiling /></RequireAuth>} />
+        <Route path="/user/editProfile" element={<RequireAuth><EditProfile /></RequireAuth>} />
+        <Route path="/user/changePassword" element={<RequireAuth><ChangePassword /></RequireAuth>} />
+        <Route path="/user/dashboard" element={<RequireAuth><DashboardUsers /></RequireAuth>} />
+        <Route path="/user/cart" element={<RequireAuth><Cart /></RequireAuth>} />
+        <Route path="/user/shipping" element={<RequireAuth><ShippingPage /></RequireAuth>} />
+        <Route path="/user/uploadPayment/:id" element={<RequireAuth><UploadPayment /></RequireAuth>} />
+
         {/* adminside */}
-        <Route path="/admin/dashboard" element={<Dashboard />} />
-        <Route path="/admin/branch/dashboard" element={<BranchDashboard/>} />
         <Route path="/admin/login" element={<LoginAdmin />} />
-        <Route path="/admin/newadmin" element={<CreateAdmin/>}/>
-        <Route path="/admin/manager" element={<AdminManagement/>}/>
-        <Route path="/admin/productStock" element={<ProductStocks/>}/>
-        <Route path="/admin/productList" element={<ProductList/>}/>
-        <Route path="/admin/productHistory" element={<ProductHistory/>}/>
-        <Route path="/admin/salesReport" element={<SalesReport/>}/>
-        <Route path="/admin/transactions" element={<Transactions/>}/>
-        <Route path="/admin/customers" element={<CustomerTransactions/>}/>
-        <Route path="/admin/orders" element={<OrderTransactions/>}/>
-        <Route path="/admin/invoices" element={<InvoicesTransactions/>}/>
+        <Route path="/admin/dashboard" element={<RequireAuth admin><Dashboard /></RequireAuth>} />
+        <Route path="/admin/branch/dashboard" element={<RequireAuth admin><BranchDashboard /></RequireAuth>} />
+        <Route path="/admin/newadmin" element={<RequireAuth admin><CreateAdmin /></RequireAuth>} />
+        <Route path="/admin/manager" element={<RequireAuth admin><AdminManagement /></RequireAuth>} />
+        <Route path="/admin/productStock" element={<RequireAuth admin><ProductStocks /></RequireAuth>} />
+        <Route path="/admin/productList" element={<RequireAuth admin><ProductList /></RequireAuth>} />
+        <Route path="/admin/productHistory" element={<RequireAuth admin><ProductHistory /></RequireAuth>} />
+        <Route path="/admin/salesReport" element={<RequireAuth admin><SalesReport /></RequireAuth>} />
+        <Route path="/admin/transactions" element={<RequireAuth admin><Transactions /></RequireAuth>} />
+        <Route path="/admin/customers" element={<RequireAuth admin><CustomerTransactions /></RequireAuth>} />
+        <Route path="/admin/orders" element={<RequireAuth admin><OrderTransactions /></RequireAuth>} />
+        <Route path="/admin/invoices" element={<RequireAuth admin><InvoicesTransactions /></RequireAuth>} />
+        <Route path="/admin/discount" element={<RequireAuth admin><Discount /></RequireAuth>} />
 
         <Route path="*" element={<NotFound />} />
 

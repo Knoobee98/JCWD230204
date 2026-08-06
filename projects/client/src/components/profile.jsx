@@ -1,6 +1,6 @@
 import ProfilePict from './../assets/img/user.png'
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../utils/api'
 
 export default function Profile() {
 
@@ -8,7 +8,7 @@ export default function Profile() {
 
     const getProfile = async() => {
         try {
-            const response = await axios.get(process.env.REACT_APP_API_GET_PROFILES ,{
+            const response = await api.get(process.env.REACT_APP_API_GET_PROFILES ,{
                 headers: {
                     token: localStorage.getItem('token')
                 }

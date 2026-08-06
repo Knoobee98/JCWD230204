@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 import { useNavigate} from 'react-router-dom';
 import NavbarUser from "../../components/navbaruser";
 import HomeMenu from "../../components/homemenu";
@@ -13,7 +13,7 @@ export default function Profiling (){
 
     const getProfile = async () => {
       try {
-        const response = await axios.get(process.env.REACT_APP_API_GET_PROFILES, {
+        const response = await api.get(process.env.REACT_APP_API_GET_PROFILES, {
           headers: {
             token: localStorage.getItem('token')
           }

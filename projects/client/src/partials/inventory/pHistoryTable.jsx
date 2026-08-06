@@ -1,182 +1,70 @@
 import React, { useState, useEffect } from 'react';
-import History from './pHistoryTableItem'
-
-import Image01 from '../../images/fauzan.png'
-import Image02 from '../../images/man.png'
-import Image03 from '../../images/woman.png'
+import { toast } from 'react-hot-toast';
+import api from '../../utils/api';
 
 function HistoryTable({
   selectedItems
 }) {
 
-  const history = [
-    {
-      id: '0',
-      image: Image01,
-      order: '#123567',
-      date: '22/01/2021',
-      customer: 'Uchihaganteng',
-      total: 'Rp.1.290.000',
-      status: 'Refunded',
-      items: '1',
-      location: 'Jakarta', 
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '1',
-      image: Image01,
-      order: '#779912',
-      date: '22/01/2021',
-      customer: 'Yasuoggsekali',
-      total: 'Rp.890.000',
-      status: 'Approved',
-      items: '2',
-      location: 'Jakarta',
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '2',
-      image: Image02,
-      order: '#889924',
-      date: '22/01/2021',
-      customer: 'Janganboros',
-      total: 'Rp.890.000',
-      status: 'Approved',
-      items: '2',
-      location: 'Bogor',
-      type: 'One-time',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '3',
-      image: Image01,
-      order: '#897726',
-      date: '22/01/2021',
-      customer: 'Mainmulukapanbelajarnya',
-      total: 'Rp.590.000',
-      status: 'Pending',
-      items: '1',
-      location: 'Bogor',
-      type: 'One-time',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '4',
-      image: Image03,
-      order: '#123567',
-      date: '22/01/2021',
-      customer: 'Ahkamubisaaja',
-      total: 'Rp.390.000',
-      status: 'Refunded',
-      items: '1',
-      location: 'Bogor',
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '5',
-      image: Image01,
-      order: '#896644',
-      date: '21/01/2021',
-      customer: 'Maafsayakhilaf',
-      total: 'Rp.590.000',
-      status: 'Approved',
-      items: '1',
-      location: 'Jakarta',
-      type: 'One-time',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '6',
-      image: Image03,
-      order: '#136988',
-      date: '21/01/2021',
-      customer: 'Gayanomorsatu',
-      total: 'Rp.890.000',
-      status: 'Approved',
-      items: '1',
-      location: 'Tangerang Selatan',
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '7',
-      image: Image03,
-      order: '#442206',
-      date: '21/01/2021',
-      customer: 'Skillmembatu',
-      total: 'Rp.1.290.000',
-      status: 'Approved',
-      items: '2',
-      location: 'Tangerang Selatan',
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '8',
-      image: Image02,
-      order: '#764321',
-      date: '21/01/2021',
-      customer: 'Lulusinakuya',
-      total: 'Rp.890.000',
-      status: 'Pending',
-      items: '2',
-      location: 'Tangerang Selatan',
-      type: 'One-time',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-      id: '9',
-      image: Image01,
-      order: '#908764',
-      date: '21/01/2021',
-      customer: 'aamiinlulus',
-      total: 'Rp.590.000',
-      status: 'Refunded',
-      items: '1',
-      location: 'Jakarta',
-      type: 'Subscription',
-      description: 'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    }
-  ];
-
-  const [selectAll, setSelectAll] = useState(false);
-  const [isCheck, setIsCheck] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [selectedProduct, setSelectedProduct] = useState('');
   const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setList(history);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/api/admin/getBranchProducts');
+        const data = response.data.data || [];
+        setProducts(data);
+        if (data.length) {
+          setSelectedProduct(String(data[0].id));
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Failed to load products');
+      }
+    };
+    fetchProducts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSelectAll = () => {
-    setSelectAll(!selectAll);
-    setIsCheck(list.map(li => li.id));
-    if (selectAll) {
-      setIsCheck([]);
-    }
-  };
-
-  const handleClick = e => {
-    const { id, checked } = e.target;
-    setSelectAll(false);
-    setIsCheck([...isCheck, id]);
-    if (!checked) {
-      setIsCheck(isCheck.filter(item => item !== id));
+  const fetchHistory = async (productId) => {
+    if (!productId) return;
+    setLoading(true);
+    try {
+      const response = await api.get(`/api/admin/getStockHistory?product_id=${productId}`);
+      setList(response.data.data || []);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load stock history');
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    selectedItems(isCheck);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCheck]);
+    fetchHistory(selectedProduct);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedProduct]);
+
+  const formatDate = (date) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleString('id-ID');
+  };
 
   return (
     <div className="bg-white shadow-lg rounded-sm border border-slate-200 relative">
-      <header className="px-5 py-4">
-        <h2 className="font-semibold text-slate-800">All History <span className="text-slate-400 font-medium">442</span></h2>
+      <header className="px-5 py-4 flex flex-wrap items-center justify-between gap-4">
+        <h2 className="font-semibold text-slate-800">Stock History <span className="text-slate-400 font-medium">{list.length}</span></h2>
+        <select
+          className="form-select"
+          value={selectedProduct}
+          onChange={(e) => setSelectedProduct(e.target.value)}
+        >
+          {products.length === 0 && <option value="">No products</option>}
+          {products.map((product) => (
+            <option key={product.id} value={product.id}>{product.products_name}</option>
+          ))}
+        </select>
       </header>
       <div>
 
@@ -186,68 +74,45 @@ function HistoryTable({
             {/* Table header */}
             <thead className="text-xs uppercase text-slate-500 bg-slate-50 border-t border-slate-200">
               <tr>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap w-px">
-                  <div className="flex items-center">
-                    <label className="inline-flex">
-                      <span className="sr-only">Select all</span>
-                      <input className="form-checkbox" type="checkbox" checked={selectAll} onChange={handleSelectAll} />
-                    </label>
-                  </div>
-                </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">User Order</div>
+                  <div className="font-semibold text-left">Event</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                   <div className="font-semibold text-left">Date</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Username</div>
+                  <div className="font-semibold text-center">Qty Changed</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Total</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Status</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold">Items</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Branch</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Payment type</div>
-                </th>
-                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <span className="sr-only">Menu</span>
+                  <div className="font-semibold text-right">Remaining</div>
                 </th>
               </tr>
             </thead>
-            {/* Table body */}
-            {
-              list.map(order => {
-                return (
-                  <History
-                    key={order.id}
-                    id={order.id}
-                    image={order.image}
-                    order={order.order}
-                    date={order.date}
-                    customer={order.customer}
-                    total={order.total}
-                    status={order.status}
-                    items={order.items}
-                    location={order.location}
-                    type={order.type}
-                    description={order.description}
-                    handleClick={handleClick}
-                    isChecked={isCheck.includes(order.id)}
-                  />
-                )
-              })
-            }
+            <tbody className="text-sm divide-y divide-slate-200">
+              {loading ? (
+                <tr><td colSpan="4" className="px-2 py-8 text-center text-slate-400">Loading history...</td></tr>
+              ) : list.length === 0 ? (
+                <tr><td colSpan="4" className="px-2 py-8 text-center text-slate-400">No history found for this product</td></tr>
+              ) : list.map((item) => (
+                <tr key={item.id}>
+                  <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                    <span className="inline-flex font-medium rounded-full text-center px-2.5 py-0.5 bg-slate-100 text-slate-600">
+                      {item.event_type}
+                    </span>
+                  </td>
+                  <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                    <div>{formatDate(item.event_date)}</div>
+                  </td>
+                  <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                    <div className="text-center font-medium">{item.quantity_changed}</div>
+                  </td>
+                  <td className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                    <div className="text-right font-medium text-slate-700">{item.remaining_quantity}</div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
-
         </div>
       </div>
     </div>

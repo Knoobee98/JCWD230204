@@ -17,13 +17,18 @@ module.exports = (sequelize, DataTypes) => {
       discounts.belongsTo(models.admin, {
         foreignKey: 'admin_id'
       })
+      discounts.belongsTo(models.products, {
+        foreignKey: 'product_id'
+      })
     }
   }
   discounts.init({
     name: DataTypes.STRING,
     voucher_value: DataTypes.STRING,
     type: DataTypes.STRING,
-    expiry_date: DataTypes.DATE
+    expiry_date: DataTypes.DATE,
+    product_id: DataTypes.INTEGER,
+    admin_id: DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'discounts',

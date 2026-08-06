@@ -325,12 +325,12 @@ function Sidebar({
                 </NavLink>
               </li>
               {/* Discount */}
-              <li className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${pathname.includes('campaigns') && 'bg-[#0E112B]'}`}>
+              <li className={`px-3 py-2 rounded-sm mb-0.5 last:mb-0 ${pathname.includes('discount') && 'bg-[#0E112B]'}`}>
                 <NavLink
                   end
-                  to="/admin/salesReport"
+                  to="/admin/discount"
                   className={`block text-slate-200 hover:text-white truncate transition duration-150 ${
-                    pathname.includes('campaigns') && 'hover:text-slate-200'
+                    pathname.includes('discount') && 'hover:text-slate-200'
                   }`}
                 >
                   <div className="flex items-center">

@@ -1,111 +1,42 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
 import TransactionItem from './TransactionsTableItem';
-
-import Image01 from '../../../images/mutia.png'
-import Image02 from '../../../images/mutia.png'
-import Image03 from '../../../images/mutia.png'
-import Image04 from '../../../images/mutia.png'
-import Image05 from '../../../images/mutia.png'
-import Image06 from '../../../images/mutia.png'
-import Image07 from '../../../images/mutia.png'
-import Image08 from '../../../images/mutia.png'
-import Image09 from '../../../images/mutia.png'
+import api from '../../../utils/api';
 
 function TransactionsTable({
   selectedItems
 }) {
 
-  const transactions = [
-    {
-      id: '0',
-      image: Image01,
-      name: 'lalalasicantekmaneez',
-      date: '22/01/2022',
-      status: 'Pending',
-      amount: '-Rp.1,299.22',
-    },
-    {
-      id: '1',
-      image: Image02,
-      name: 'lalalasicantekmaneez' ,
-      date: '22/01/2022',
-      status: 'Completed',
-      amount: '-Rp.1,029.77',
-    },
-    {
-      id: '2',
-      image: Image03,
-      name: 'lalalasicantekmaneez' ,
-      date: '22/01/2022',
-      status: 'Pending',
-      amount: '+Rp.499.99',
-    },
-    {
-      id: '3',
-      image: Image04,
-      name: 'lalalasicantekmaneez' ,
-      date: '22/01/2022',
-      status: 'Completed',
-      amount: '-Rp.1,029.77',
-    },
-    {
-      id: '4',
-      image: Image05,
-      name: 'lalalasicantekmaneez' ,
-      date: '22/01/2022',
-      status: 'Pending',
-      amount: '+Rp.2,179.36',
-    },
-    {
-      id: '5',
-      image: Image04,
-      name: 'lalalasicantekmaneez' ,
-      date: '22/01/2022',
-      status: 'Canceled',
-      amount: '-Rp.1,029.77',
-    },
-    {
-      id: '6',
-      image: Image06,
-      name: 'lalalasicantekmaneez',
-      date: '22/01/2022',
-      status: 'Completed',
-      amount: '-Rp.272.88',
-    },
-    {
-      id: '7',
-      image: Image07,
-      name: 'lalalasicantekmaneez' ,
-      date: '22/01/2022',
-      status: 'Completed',
-      amount: '-Rp.199.87',
-    },
-    {
-      id: '8',
-      image: Image08,
-      name: 'lalalasicantekmaneez' ,
-      date: '22/01/2022',
-      status: 'Completed',
-      amount: '-Rp.42.87',
-    },
-    {
-      id: '9',
-      image: Image09,
-      name: 'lalalasicantekmaneez',
-      date: '22/01/2022',
-      status: 'Completed',
-      amount: '-Rp.112.44',
-    },
-  ];
-
   const [selectAll, setSelectAll] = useState(false);
   const [isCheck, setIsCheck] = useState([]);
   const [list, setList] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchTransactions = async () => {
+    try {
+      const response = await api.get('/api/admin/getTransactions');
+      setList(response.data.data || []);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load transactions');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setList(transactions);
+    fetchTransactions();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleStatusChange = async (id, transactionStatus) => {
+    try {
+      await api.post(`/api/admin/updateStatus/${id}`, { transactionStatus });
+      toast.success('Transaction status updated');
+      fetchTransactions();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update status');
+    }
+  };
 
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
@@ -147,10 +78,13 @@ function TransactionsTable({
                   </div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Username</div>
+                  <div className="font-semibold text-left">Order</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div className="font-semibold text-left">Payment Date</div>
+                  <div className="font-semibold text-left">User ID</div>
+                </th>
+                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div className="font-semibold text-left">Date</div>
                 </th>
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                   <div className="font-semibold text-left">Status</div>
@@ -158,21 +92,33 @@ function TransactionsTable({
                 <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                   <div className="font-semibold text-right">Total</div>
                 </th>
+                <th className="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div className="font-semibold text-left">Actions</div>
+                </th>
               </tr>
             </thead>
             {/* Table body */}
             <tbody className="text-sm divide-y divide-slate-200 border-b border-slate-200">
-              {list.map((transaction) => {
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="px-2 py-8 text-center text-slate-400">Loading transactions...</td>
+                </tr>
+              ) : list.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="px-2 py-8 text-center text-slate-400">No transactions found</td>
+                </tr>
+              ) : list.map((transaction) => {
                 return (
                   <TransactionItem
                     key={transaction.id}
                     id={transaction.id}
-                    image={transaction.image}
-                    name={transaction.name}
+                    orderId={transaction.orderId}
+                    user_id={transaction.user_id}
                     date={transaction.date}
-                    status={transaction.status}
-                    amount={transaction.amount}
+                    status={transaction.transactions_status?.status_name}
+                    amount={transaction.total}
                     handleClick={handleClick}
+                    handleStatusChange={handleStatusChange}
                     isChecked={isCheck.includes(transaction.id)}
                   />
                 );

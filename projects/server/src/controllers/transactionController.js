@@ -510,6 +510,14 @@ module.exports = {
 
       const { transaction_id } = req.params;
 
+      if (!transaction_id) {
+        return res.status(400).send({
+          isError: true,
+          message: "transaction id is required",
+          data: null,
+        });
+      }
+
       const findUser = await users.findOne({
         where: { id },
       });
@@ -533,7 +541,7 @@ module.exports = {
           data: null,
         });
       }
-      if (!req.files) {
+      if (!req.files || !req.files.images || !req.files.images.length) {
         return res.status(400).send({
           isError: true,
           message: "please upload your payment proof",

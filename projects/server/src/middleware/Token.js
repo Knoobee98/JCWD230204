@@ -23,4 +23,28 @@ module.exports = {
 			});
 		}
 	},
+
+	requireRole: (roles) => {
+		return (req, res, next) => {
+			if (!req.uid) {
+				return res.status(401).send({
+					isError: true,
+					message: "Unauthorized",
+					data: null,
+				});
+			}
+
+			const role = req.uid.status;
+
+			if (!roles.includes(role)) {
+				return res.status(403).send({
+					isError: true,
+					message: "Forbidden: insufficient role",
+					data: null,
+				});
+			}
+
+			next();
+		};
+	},
 };

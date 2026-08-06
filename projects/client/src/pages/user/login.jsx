@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../utils/api";
 import { useRef } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -19,7 +19,7 @@ export default function Login(){
 	let onLogin = async () => {
 		try {
 			
-			let data = await axios.post(process.env.REACT_APP_API_LOGIN, {
+			let data = await api.post(process.env.REACT_APP_API_LOGIN, {
 				email: email.current.value,
 				password: password.current.value,
 			});

@@ -1,5 +1,5 @@
 import React from 'react';
-import axios from "axios";
+import api from "../../utils/api";
 
 import { useRef, useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
@@ -17,7 +17,7 @@ function Signin() {
 	let onLogin = async () => {
 		try {
       console.log(email.current.value, password.current.value);
-			let response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/admin/login`, {
+			let response = await api.post(`${process.env.REACT_APP_API_BASE_URL}/api/admin/login`, {
 				email: email.current.value,
 				password: password.current.value,
 			});

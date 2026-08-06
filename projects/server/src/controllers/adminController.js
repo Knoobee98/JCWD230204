@@ -142,7 +142,7 @@ module.exports = {
     getTransactionUser: async(req, res) => {
         try {
             const findTransaction = await db.transactions.findAll({
-                attributes: ['id', 'date', 'expiry_date', 'payment_proof', 'user_id'],
+                attributes: ['id', 'orderId', 'date', 'expiry_date', 'payment_proof', 'user_id', 'total', 'city', 'address', 'postal_code', 'shipping'],
                 include: [{
                     model: db.transactions_status,
                     attributes: ['status_name']
@@ -168,7 +168,7 @@ module.exports = {
 
     updateTransactionStatus: async(req, res) => {
         const {transactionStatus} = req.body;
-        const {transactionId} = req.params;
+        const { id: transactionId } = req.params;
 
         try {
             
@@ -606,13 +606,34 @@ module.exports = {
         }
     },
 
+    getDiscounts: async(req, res) => {
+        try {
+            const findDiscounts = await discount.findAll({
+                attributes: ['id', 'name', 'voucher_value', 'type', 'expiry_date', 'admin_id', 'product_id']
+            })
+
+            res.status(200).send({
+                isError: false,
+                message: "Get Discounts Success",
+                data: findDiscounts,
+            })
+        } catch (error) {
+            res.status(400).send({
+                isError: true,
+                message: "Get Discounts Failed",
+                data: error.message,
+            })
+        }
+    },
+
     createDiscount: async(req, res) => {
         const t = await sequelize.transaction()
         const {discount_name, discount_type, discount_value, product_id, days} = req.body;
         const {admin_id} = req.params
+        const resolvedAdminId = admin_id === 'me' || !admin_id ? req.uid.id : admin_id;
         try{
 
-            const findAdmin = await admin.findByPk(admin_id)
+            const findAdmin = await admin.findByPk(resolvedAdminId)
             if(!findAdmin){
                 return res.status(404).send({
                     isError: true,
@@ -631,14 +652,12 @@ module.exports = {
                     type: discount_type,
                     voucher_value: discount_value,
                     expiry_date: expiry_date,
-                    admin_id: admin_id,
+                    admin_id: resolvedAdminId,
                     product_id: product_id
                 };
 
                 discounts.push(newDiscount)
             }
-
-            console.log(discounts)
 
             const createDiscount = await discount.bulkCreate(discounts, {transaction: t});
 

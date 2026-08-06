@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../utils/api";
 import { useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -13,7 +13,7 @@ export default function LoginAdmin(){
 	let handleSubmit = async () => {
 		try {
 			
-			let data = await axios.post("http://localhost:8000/admin/branchAdmin", {
+			let data = await api.post("/api/admin/register", {
 				email: email,
 				password: password,
 			});

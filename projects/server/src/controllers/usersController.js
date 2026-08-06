@@ -91,7 +91,7 @@ module.exports = {
     },
 
     activation: async(req, res) => {
-        let {id} = req.body
+        let {id} = req.params;
         
         try {
 
@@ -221,7 +221,7 @@ module.exports = {
             const template = await fs.readFile(path.resolve(__dirname, '../template/resetPassword.html'), 'utf-8')
             const templateToCompile = await handlebars.compile(template);
             const newTemplate = templateToCompile({
-                username, url: `https://jcwd230204.purwadhikabootcamp.com/user/resetPassword/${findEmail.dataValues.id}`,
+                username, url: `${process.env.CLIENT_BASE_URL || 'https://jcwd230204.purwadhikabootcamp.com'}/user/resetPassword/${findEmail.dataValues.id}`,
             });
 
             await transporter.sendMail({
@@ -247,8 +247,8 @@ module.exports = {
 
     resetPassword: async (req, res) => {
         try {
-            let { id, password, confirmPassword } = req.body;
-            console.log(id)
+            let { id } = req.params;
+            let { password, confirmPassword } = req.body;
 
             let findUser = await users.findOne({
                 where: {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../../utils/api";
 import { AiOutlineArrowRight, AiFillDelete } from "react-icons/ai";
 import { useParams, useNavigate } from "react-router-dom";
 import NavbarUser from "../../components/navbaruser";
@@ -19,7 +19,7 @@ export default function Cart() {
   const getCart = async () => {
     //add to cart function
     try {
-      const response = await axios.get(process.env.REACT_APP_API_GET_CART, {
+      const response = await api.get(process.env.REACT_APP_API_GET_CART, {
         headers: {
           token: localStorage.getItem('token')
         }
@@ -49,7 +49,7 @@ export default function Cart() {
     //remove from cart function
     try {
       const url = process.env.REACT_APP_API_DELETE_CART.replace(':cartId', cartItemId)
-      await axios.delete(url, {
+      await api.delete(url, {
         headers: {
           token: localStorage.getItem('token')
         }
@@ -64,7 +64,7 @@ export default function Cart() {
     //update cart automatically updates qty
     try {
       const url = process.env.REACT_APP_API_UPDATE_QTY.replace(':id', id).replace(':option', option)
-      await axios.get(url, {
+      await api.get(url, {
         headers: {
           token: localStorage.getItem('token')
         }

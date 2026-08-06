@@ -1,5 +1,5 @@
 import { useNavigate} from 'react-router-dom'
-import axios from 'axios'
+import api from '../../utils/api'
 import { useEffect, useState, useRef } from 'react'
 import NavBar from '../../components/navbaruser';
 import HomeMenu from "../../components/homemenu";
@@ -24,7 +24,7 @@ export default function ProductPage(){
     let getProducts = async() => {
         try {
             const url = process.env.REACT_APP_API_GET_PRODUCTS_PAGE.replace(':page', page).replace(':sort', sort).replace(':sortType', sortType).replace(':filter', filter)
-            const response = await axios.get(url)
+            const response = await api.get(url)
             setProducts(response.data.data)
             setTotalPages(response.data.totalPages || 1)
         } catch (error) {
@@ -34,7 +34,7 @@ export default function ProductPage(){
 
     let getCategory = async() => {
         try{
-            const response = await axios.get(process.env.REACT_APP_API_GET_CATEGORY)
+            const response = await api.get(process.env.REACT_APP_API_GET_CATEGORY)
             setCategory(response.data.data)
         } catch(error){
             console.log(error.message)
@@ -51,7 +51,7 @@ export default function ProductPage(){
         console.log(filter, inputSearch)
         try{
             const url = process.env.REACT_APP_API_PRODUCTS_FILTER.replace(':filter', filter).replace(':inputSearch', inputSearch)
-            const response = await axios.get(url);
+            const response = await api.get(url);
             console.log(response.data.data)
             setProducts(response.data.data)
             setTotalPages(response.data.totalPages || 1)

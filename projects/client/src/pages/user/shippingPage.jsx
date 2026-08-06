@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../../utils/api';
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast, Toaster } from 'react-hot-toast';
@@ -32,7 +32,7 @@ export default function CheckoutPage(){
 
     const getCart = async() => {
         try {
-            const response = await axios.get(process.env.REACT_APP_API_GET_CART, {
+            const response = await api.get(process.env.REACT_APP_API_GET_CART, {
                 headers: {
                     token: localStorage.getItem('token')
                 }
@@ -49,7 +49,7 @@ export default function CheckoutPage(){
     const PlaceOrder = async() => {
         const token = localStorage.getItem('token')
         try{
-            const response = await axios.post(process.env.REACT_APP_API_PLACE_ORDER, {
+            const response = await api.post(process.env.REACT_APP_API_PLACE_ORDER, {
                 cartItem: id,
                 address: inputAddress.current.value,
                 city: destination,
@@ -75,7 +75,7 @@ export default function CheckoutPage(){
 
     const getCity = async() => {
         try {
-            const response =await axios.get(process.env.REACT_APP_API_RAJAONGKIR_CITY)
+            const response =await api.get(process.env.REACT_APP_API_RAJAONGKIR_CITY)
             console.log(response.data.data)
             setCity(response.data.data)
 
@@ -86,7 +86,7 @@ export default function CheckoutPage(){
 
     const getProvince = async() => {
         try {
-            const response =await axios.get(process.env.REACT_APP_API_RAJAONGKIR_STATE)
+            const response =await api.get(process.env.REACT_APP_API_RAJAONGKIR_STATE)
             console.log(response.data.data)
             setState(response.data.data)
 
@@ -98,7 +98,7 @@ export default function CheckoutPage(){
 
     const getOngkir = async() => {
         try {
-            const response = await axios.post(process.env.REACT_APP_API_RAJAONGKIR_COST, {
+            const response = await api.post(process.env.REACT_APP_API_RAJAONGKIR_COST, {
                 origin: 501,
                 destination: destination,
                 weight: 1700,
@@ -212,8 +212,8 @@ export default function CheckoutPage(){
                 </div>
                 <div className='flex flex-col gap-4'>
                     <h1>Payment</h1>
-                    <p>Bank Mandiri a/n Fauzan 4000388388747475849</p>
-                    <p>Bank BCA a/n Putri 299300039940934343</p>
+                    <p>{process.env.REACT_APP_BANK_MANDIRI}</p>
+                    <p>{process.env.REACT_APP_BANK_BCA}</p>
                 </div>
                 <div className='flex flex-col gap-4'>
                     <h1>Order Summary</h1>

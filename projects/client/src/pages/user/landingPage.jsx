@@ -1,4 +1,4 @@
-import axios from 'axios';
+import api from '../../utils/api';
 import { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import HomeMenu from "../../components/homemenu";
@@ -15,7 +15,7 @@ export default function LandingPage(){
 
     let getProducts = async() => {
         try {
-            let response = await axios.get(process.env.REACT_APP_API_GET_PRODUCTS);
+            let response = await api.get(process.env.REACT_APP_API_GET_PRODUCTS);
             console.log(response.data.data);
             setProducts(response.data.data);
         } catch (error) {
@@ -26,7 +26,7 @@ export default function LandingPage(){
 
     let getPromo = async() => {
         try {
-            let response = await axios.get(process.env.REACT_APP_API_GET_PROMO);
+            let response = await api.get(process.env.REACT_APP_API_GET_PROMO);
             console.log(response.data.data);
             setPromo(response.data.data);
         } catch (error) {
@@ -37,7 +37,7 @@ export default function LandingPage(){
 
     let getNewProducts = async() => {
         try {
-            let response = await axios.get(process.env.REACT_APP_API_GET_NEW_PRODUCTS);
+            let response = await api.get(process.env.REACT_APP_API_GET_NEW_PRODUCTS);
             console.log(response.data.data);
             setNewProducts(response.data.data);
         } catch (error) {

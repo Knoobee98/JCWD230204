@@ -1,96 +1,222 @@
-export default function Discount(){
+import React, { useState, useEffect } from 'react';
+import { toast } from 'react-hot-toast';
+import Sidebar from '../../partials/Sidebar';
+import Header from '../../partials/Header';
+import api from '../../utils/api';
+
+function Discount() {
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [discounts, setDiscounts] = useState([]);
+
+  const [form, setForm] = useState({
+    discount_name: '',
+    discount_type: 'percent',
+    discount_value: '',
+    days: '',
+    product_id: [],
+  });
+
+  const fetchData = async () => {
+    try {
+      const [productsRes, discountsRes] = await Promise.all([
+        api.get('/api/admin/getBranchProducts'),
+        api.get('/api/admin/getDiscounts'),
+      ]);
+      setProducts(productsRes.data.data || []);
+      setDiscounts(discountsRes.data.data || []);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load data');
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleProductToggle = (id) => {
+    setForm((prev) => {
+      const selected = prev.product_id.includes(id)
+        ? prev.product_id.filter((pid) => pid !== id)
+        : [...prev.product_id, id];
+      return { ...prev, product_id: selected };
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.discount_name || !form.discount_value || !form.days || form.product_id.length === 0) {
+      toast.error('All fields are required');
+      return;
+    }
+    try {
+      await api.post('/api/admin/createDiscount/me', form);
+      toast.success('Discount created successfully');
+      setForm({
+        discount_name: '',
+        discount_type: 'percent',
+        discount_value: '',
+        days: '',
+        product_id: [],
+      });
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to create discount');
+    }
+  };
+
+  const formatDate = (date) => {
+    if (!date) return '-';
+    return new Date(date).toLocaleDateString('id-ID');
+  };
+
   return (
-      <>
+    <div className="flex h-screen overflow-hidden">
+      <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+        <Header sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <main>
+          <div className="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
 
+            <div className="sm:flex sm:justify-between sm:items-center mb-8">
+              <div className="mb-4 sm:mb-0">
+                <h1 className="text-2xl md:text-3xl text-slate-800 font-bold">Discounts ✨</h1>
+              </div>
+            </div>
 
-<div className="px-4 pt-6">
-  <div className="grid gap-4 xl:grid-cols-2 2xl:grid-cols-3">
+            <div className="grid gap-6 xl:grid-cols-2">
 
-    <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm 2xl:col-span-2 dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex-shrink-0">
-          <span className="text-xl font-bold leading-none text-gray-900 sm:text-2xl dark:text-white">$45,385</span>
-          <h3 className="text-base font-light text-gray-500 dark:text-gray-400">Sales this week</h3>
-        </div>
-        <div className="flex items-center justify-end flex-1 text-base font-medium text-green-500 dark:text-green-400">
-          12.5%
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-            <path fill-rule="evenodd"
-              d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
-              clip-rule="evenodd"></path>
-          </svg>
-        </div>
-      </div>
-      <div id="main-chart"></div>
+              {/* Create discount form */}
+              <div className="bg-white shadow-lg rounded-sm border border-slate-200">
+                <header className="px-5 py-4 border-b border-slate-100">
+                  <h2 className="font-semibold text-slate-800">Create Discount</h2>
+                </header>
+                <form onSubmit={handleSubmit} className="px-5 py-4 space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Discount Name</label>
+                    <input
+                      type="text"
+                      name="discount_name"
+                      value={form.discount_name}
+                      onChange={handleChange}
+                      className="form-input w-full"
+                      placeholder="e.g. Weekend Sale"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Type</label>
+                      <select
+                        name="discount_type"
+                        value={form.discount_type}
+                        onChange={handleChange}
+                        className="form-select w-full"
+                      >
+                        <option value="percent">Percent</option>
+                        <option value="fixed">Fixed</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Value</label>
+                      <input
+                        type="number"
+                        min="0"
+                        name="discount_value"
+                        value={form.discount_value}
+                        onChange={handleChange}
+                        className="form-input w-full"
+                        placeholder={form.discount_type === 'percent' ? 'e.g. 10' : 'e.g. 50000'}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Duration (days)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      name="days"
+                      value={form.days}
+                      onChange={handleChange}
+                      className="form-input w-full"
+                      placeholder="e.g. 7"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Products</label>
+                    <div className="border border-slate-200 rounded-lg divide-y divide-slate-100 max-h-56 overflow-y-auto">
+                      {products.length === 0 && (
+                        <div className="px-4 py-3 text-sm text-slate-400">No products found</div>
+                      )}
+                      {products.map((product) => (
+                        <label key={product.id} className="flex items-center px-4 py-2.5 text-sm hover:bg-slate-50 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="form-checkbox"
+                            checked={form.product_id.includes(product.id)}
+                            onChange={() => handleProductToggle(product.id)}
+                          />
+                          <span className="ml-3 text-slate-700">{product.products_name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                  <button type="submit" className="btn bg-indigo-500 hover:bg-indigo-600 text-white w-full">
+                    Create Discount
+                  </button>
+                </form>
+              </div>
 
-
-      <div className="flex items-center justify-between pt-3 mt-4 border-t border-gray-200 sm:pt-6 dark:border-gray-700">
-          <div>
-            <button className="inline-flex items-center p-2 text-sm font-medium text-center text-gray-500 rounded-lg hover:text-gray-900 dark:text-gray-400 dark:hover:text-white" type="button" data-dropdown-toggle="weekly-sales-dropdown">Last 7 days <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
-
-            <div className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600" id="weekly-sales-dropdown">
-                <div className="px-4 py-3" role="none">
-                  <p className="text-sm font-medium text-gray-900 truncate dark:text-white" role="none">
-                    Sep 16, 2021 - Sep 22, 2021
-                  </p>
+              {/* Existing discounts */}
+              <div className="bg-white shadow-lg rounded-sm border border-slate-200">
+                <header className="px-5 py-4 border-b border-slate-100">
+                  <h2 className="font-semibold text-slate-800">Existing Discounts <span className="text-slate-400 font-medium">{discounts.length}</span></h2>
+                </header>
+                <div className="overflow-x-auto">
+                  <table className="table-auto w-full divide-y divide-slate-200">
+                    <thead className="text-xs uppercase text-slate-500 bg-slate-50">
+                      <tr>
+                        <th className="px-5 py-3 whitespace-nowrap"><div className="font-semibold text-left">Name</div></th>
+                        <th className="px-5 py-3 whitespace-nowrap"><div className="font-semibold text-left">Value</div></th>
+                        <th className="px-5 py-3 whitespace-nowrap"><div className="font-semibold text-left">Type</div></th>
+                        <th className="px-5 py-3 whitespace-nowrap"><div className="font-semibold text-left">Expiry</div></th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-sm divide-y divide-slate-200">
+                      {discounts.length === 0 && (
+                        <tr><td colSpan="4" className="px-5 py-8 text-center text-slate-400">No discounts yet</td></tr>
+                      )}
+                      {discounts.map((discount) => (
+                        <tr key={discount.id}>
+                          <td className="px-5 py-3 whitespace-nowrap font-medium text-slate-800">{discount.name}</td>
+                          <td className="px-5 py-3 whitespace-nowrap">
+                            {discount.type === 'percent' ? `${discount.voucher_value}%` : `Rp.${Number(discount.voucher_value).toLocaleString('id-ID')}`}
+                          </td>
+                          <td className="px-5 py-3 whitespace-nowrap">
+                            <span className="inline-flex font-medium rounded-full text-center px-2.5 py-0.5 bg-indigo-100 text-indigo-600">
+                              {discount.type}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3 whitespace-nowrap text-slate-600">{formatDate(discount.expiry_date)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <ul className="py-1" role="none">
-                  <li>
-                    <a href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Yesterday</a>
-                  </li>
-                  <li>
-                    <a href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Today</a>
-                  </li>
-                  <li>
-                    <a href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Last 7 days</a>
-                  </li>
-                  <li>
-                    <a href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Last 30 days</a>
-                  </li>
-                  <li>
-                    <a href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Last 90 days</a>
-                  </li>
-                </ul>
-                <div className="py-1" role="none">
-                  <a href="/" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white" role="menuitem">Custom...</a>
-                </div>
+              </div>
+
             </div>
           </div>
-          <div className="flex-shrink-0">
-            <a href="/" className="inline-flex items-center p-2 text-xs font-medium uppercase rounded-lg text-primary-700 sm:text-sm hover:bg-gray-100 dark:text-primary-500 dark:hover:bg-gray-700">
-              Sales Report
-              <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-            </a>
-          </div>
-        </div>
-
-
-        <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 sm:p-6 dark:bg-gray-800">
-        <h3 className="flex items-center mb-4 text-lg font-semibold text-gray-900 dark:text-white">Statistics this month
-        <button data-popover-target="popover-description" data-popover-placement="bottom-end" type="button"><svg className="w-4 h-4 ml-2 text-gray-400 hover:text-gray-500" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"></path></svg><span className="sr-only">Show information</span></button>
-        </h3>
-        <div data-popover id="popover-description" role="tooltip" className="absolute z-10 invisible inline-block text-sm font-light text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 w-72 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-400">
-          <div className="p-3 space-y-2">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Statistics</h3>
-              <p>Statistics is a branch of applied mathematics that involves the collection, description, analysis, and inference of conclusions from quantitative data.</p>
-              <a href="/" className="flex items-center font-medium text-primary-600 dark:text-primary-500 dark:hover:text-primary-600 hover:text-primary-700">Read more <svg className="w-4 h-4 ml-1" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg></a>
-          </div>
-          <div data-popper-arrow></div>
-        </div>
-        <div className="sm:hidden">
-            <label for="tabs" className="sr-only">Select tab</label>
-            <select id="tabs" className="bg-gray-50 border-0 border-b border-gray-200 text-gray-900 text-sm rounded-t-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                <option>Statistics</option>
-                <option>Services</option>
-                <option>FAQ</option>
-            </select>
-        </div>
-        </div>
-        
-        
+        </main>
       </div>
-      </div>
-      </div>
-      </>
-  )
+    </div>
+  );
 }
+
+export default Discount;

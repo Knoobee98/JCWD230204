@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from 'axios';
+import api from '../../utils/api';
 import { useNavigate } from "react-router-dom";
 import toast, { Toaster } from 'react-hot-toast';
 import NavbarUser from "../../components/navbaruser";
@@ -18,7 +18,7 @@ export default function Register (){
 
     const handleSubmit = async () => {
         try {
-            const data = await axios.post(process.env.REACT_APP_API_REGISTER, {username:name, email:email, password:password, phone_number:phone});
+            const data = await api.post(process.env.REACT_APP_API_REGISTER, {username:name, email:email, password:password, phone_number:phone});
             console.log(data.data.message);
              toast.success (data.data.message)
              setTimeout(()=> {

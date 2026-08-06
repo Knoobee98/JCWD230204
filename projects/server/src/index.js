@@ -6,9 +6,16 @@ const path = require("path");
 
 const PORT = process.env.PORT || 8000;
 const app = express();
-app.use(cors());
+
+const allowedOrigins = (process.env.CORS_ORIGINS ||
+    'http://localhost:3000,https://jcwd230204.purwadhikabootcamp.com,https://jcwd-230204-client.vercel.app')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
-app.use('/Public', express.static('Public'))
+app.use('/Public', express.static(path.join(__dirname, '/Public')))
 
 //#region API ROUTES
 const {adminRouter, productsRouter, usersRouter, transactionRouter, rajaOngkirAPIRouter, openCageRouter} = require('./routers');
@@ -20,8 +27,6 @@ app.use('/api/rajaOngkir', rajaOngkirAPIRouter);
 app.use('/api/openCage', openCageRouter)
 
 // NOTE : Add your routes here
-
-app.use('/Public', express.static(path.join(__dirname, '/Public')))
 
 app.get("/api", (req, res) => {
   res.send(`Hello, this is my API`);
@@ -38,7 +43,11 @@ app.get("/api/greetings", (req, res, next) => {
 // not found
 app.use((req, res, next) => {
   if (req.path.includes("/api/")) {
-    res.status(404).send("Not found !");
+    res.status(404).send({
+      isError: true,
+      message: "Not found !",
+      data: null,
+    });
   } else {
     next();
   }
@@ -48,7 +57,11 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   if (req.path.includes("/api/")) {
     console.error("Error : ", err.stack);
-    res.status(500).send("Error !");
+    res.status(err.status || 500).send({
+      isError: true,
+      message: err.message || "Internal Server Error",
+      data: err.data || null,
+    });
   } else {
     next();
   }
@@ -67,13 +80,17 @@ app.get("*", (req, res) => {
 
 //#endregion
 
-app.listen(PORT, (err) => {
-  if (err) {
-    console.log(`ERROR: ${err}`);
-  } else {
-    console.log(`APP RUNNING at ${PORT} ✅`);
-  }
-});
+if (require.main === module) {
+  app.listen(PORT, (err) => {
+    if (err) {
+      console.log(`ERROR: ${err}`);
+    } else {
+      console.log(`APP RUNNING at ${PORT} ✅`);
+    }
+  });
+}
+
+module.exports = app;
 
 // sequelize synchronous
 // const Sequelize = require('sequelize')

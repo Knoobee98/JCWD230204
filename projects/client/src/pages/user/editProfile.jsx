@@ -1,4 +1,4 @@
-import axios from 'axios'
+import api from '../../utils/api'
 import { useRef } from 'react'
 import NavbarUser from "../../components/navbaruser";
 import HomeMenu from "../../components/homemenu";
@@ -16,7 +16,7 @@ export default function EditProfileForm(){
             let inputName = name.current.value
             let inputGender = gender.current.value
             let inputBirthdate = birthdate.current.value
-            let result = await axios.patch(`${process.env.REACT_APP_API_BASE_URL}/api/users/update`, {email: inputEmail, name: inputName, gender: inputGender, birthdate: inputBirthdate}, {
+            let result = await api.patch(`${process.env.REACT_APP_API_BASE_URL}/api/users/update`, {email: inputEmail, name: inputName, gender: inputGender, birthdate: inputBirthdate}, {
                 headers: {
                     token: localStorage.getItem('token')
                 }

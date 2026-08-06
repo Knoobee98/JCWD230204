@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-only-change-me';
+const JWT_SECRET = process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? null : 'dev-only-change-me');
+
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is required in production');
+}
 
 module.exports = {
     createToken: (payload) => {
