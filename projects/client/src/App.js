@@ -41,6 +41,8 @@ import InvoicesTransactions from "./pages/admin/invoices"
 import Discount from "./pages/admin/discount";
 // static 404
 import NotFound from "./pages/notfound";
+// maintenance
+import UnderMaintenance from "./pages/underMaintenance";
 
 
 export default function App() {
@@ -55,6 +57,9 @@ useEffect(() => {
   return (
     <div className="App">
 
+      {process.env.REACT_APP_MAINTENANCE === 'true' ? (
+        <UnderMaintenance />
+      ) : (
       <Routes>
         {/* userside */}
         <Route path="/" element={<LandingPage />} />
@@ -92,6 +97,7 @@ useEffect(() => {
         <Route path="*" element={<NotFound />} />
 
       </Routes>
+      )}
       <Toaster/>
     </div>
   );
