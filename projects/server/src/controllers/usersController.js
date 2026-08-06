@@ -56,20 +56,19 @@ module.exports = {
             }, {transaction: t})
 
 
-            // step 5 : kirim email (non-blocking)
-            try {
-                const template = await fs.readFile(path.resolve(__dirname, '../template/confirmation.html'), 'utf-8')
-                const templateToCompile = handlebars.compile(template)
-                const newTemplate = templateToCompile({username:username, url: `${process.env.CLIENT_BASE_URL || 'https://jcwd230204.purwadhikabootcamp.com'}/activation/${resCreateUser.id}`,})
-                await transporter.sendMail({
-                    from: 'GAMEPEDIA',
-                    to: email,
-                    subject: 'Account Activation',
-                    html: newTemplate
+            // step 5 : kirim email (fire-and-forget, non-blocking)
+            fs.readFile(path.resolve(__dirname, '../template/confirmation.html'), 'utf-8')
+                .then((template) => {
+                    const newTemplate = handlebars.compile(template)({username: username, url: `${process.env.CLIENT_BASE_URL || 'https://jcwd230204.purwadhikabootcamp.com'}/activation/${resCreateUser.id}`})
+                    return transporter.sendMail({
+                        from: 'GAMEPEDIA',
+                        to: email,
+                        subject: 'Account Activation',
+                        html: newTemplate
+                    })
                 })
-            } catch (emailError) {
-                console.error("activation email send failed:", emailError)
-            }
+                .then(() => console.log("activation email sent"))
+                .catch((emailError) => console.error("activation email send failed:", emailError))
 
             // step 6 : kirim response
             await t.commit()
@@ -232,18 +231,21 @@ module.exports = {
 
             const resetToken = createResetToken({ id: findEmail.dataValues.id });
 
-            const template = await fs.readFile(path.resolve(__dirname, '../template/resetPassword.html'), 'utf-8')
-            const templateToCompile = await handlebars.compile(template);
-            const newTemplate = templateToCompile({
-                username, url: `${process.env.CLIENT_BASE_URL || 'https://jcwd230204.purwadhikabootcamp.com'}/user/resetPassword/${resetToken}`,
-            });
-
-            await transporter.sendMail({
-                from: "Gamepedia",
-                to: email,
-                subject: "Reset Password",
-                html: newTemplate,
-            });
+            // send reset email (fire-and-forget, non-blocking)
+            fs.readFile(path.resolve(__dirname, '../template/resetPassword.html'), 'utf-8')
+                .then((template) => {
+                    const newTemplate = handlebars.compile(template)({
+                        username, url: `${process.env.CLIENT_BASE_URL || 'https://jcwd230204.purwadhikabootcamp.com'}/user/resetPassword/${resetToken}`,
+                    })
+                    return transporter.sendMail({
+                        from: "Gamepedia",
+                        to: email,
+                        subject: "Reset Password",
+                        html: newTemplate,
+                    })
+                })
+                .then(() => console.log("reset password email sent"))
+                .catch((emailError) => console.error("reset password email send failed:", emailError))
 
             res.status(200).send({
                 isError: false,
