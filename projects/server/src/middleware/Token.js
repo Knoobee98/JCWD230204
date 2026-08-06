@@ -34,7 +34,7 @@ module.exports = {
 				});
 			}
 
-			const role = req.uid.status;
+			const role = req.uid.role || req.uid.status;
 
 			if (!roles.includes(role)) {
 				return res.status(403).send({

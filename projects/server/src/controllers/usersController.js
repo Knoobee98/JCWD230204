@@ -12,7 +12,7 @@ const profiles = db.profiles;
 // import hash
 const {hashPassword, hashMatch} = require('./../lib/hash')
 // import jwtoken
-const {createToken} = require('../lib/jwtoken')
+const {createToken, createResetToken, validateToken} = require('../lib/jwtoken')
 
 const transporter = require('./../helpers/transport');
 const fs = require('fs').promises
@@ -24,13 +24,11 @@ module.exports = {
         // rollback
         const t = await sequelize.transaction() 
         try {
-            console.log('masuk register')
-
             // step 1: ambil data dari req.body
             const {username, email, password, phone_number} = req.body
 
             // step 2: validasi
-            if(!username.length || !email.length || !password.length || !phone_number.length )
+            if(!username || !email || !password || !phone_number)
             return res.status(404).send({
                 isError: true,
                 message: 'Input is required',
@@ -49,7 +47,6 @@ module.exports = {
                     message: 'email already exist',
                     data: null
                 })
-                console.log(findEmail)
 
             // step 4: simpan data ke database 
             const resCreateUser = await users.create({id: uuidv4(), username, email, password: await hashPassword(password), phone_number, status: 'unconfirmed'}, {transaction: t})
@@ -80,12 +77,12 @@ module.exports = {
             })
         } catch (error) {
             await t.rollback()
-            console.log(error)
+            console.error("register error:", error)
   
             res.status(404).send({
                 isError: true, 
                 message: "Register Failed", 
-                data: error.message
+                data: null
             })
         }
     },
@@ -94,6 +91,15 @@ module.exports = {
         let {id} = req.params;
         
         try {
+            const findUser = await users.findOne({ where: { id } })
+
+            if (!findUser) {
+                return res.status(404).send({
+                    isError: true,
+                    message: "User not found",
+                    data: null
+                })
+            }
 
             await users.update(
                 {status: 'Confirmed'},
@@ -111,11 +117,11 @@ module.exports = {
                 data: null 
             })
             } catch (error) {
-                console.log(error)
+                console.error("activation error:", error)
                 res.status(404).send({
                     isError: true,
                     message: "Activation Failed",
-                    data: error.message
+                    data: null
                 })
             }
          },
@@ -160,6 +166,7 @@ module.exports = {
                 id: findEmail.dataValues.id,
                 username: findEmail.dataValues.username,
                 status: findEmail.dataValues.status,
+                role: 'user',
             });
 
             res.status(200).send({
@@ -169,10 +176,11 @@ module.exports = {
                     // tambahkan status user verified or not
                 });
         } catch (error) {
+            console.error("login error:", error)
             res.status(404).send({
 				isError: true,
 				message: "Login Failed",
-				data: error.message,
+				data: null,
 			});   
         }
     },
@@ -185,9 +193,10 @@ module.exports = {
                 data: req.uid,
             });
         } catch (error) {
+            console.error("keepLogin error:", error)
             res.status(500).send({
                 isError: true,
-                message: error.message,
+                message: "Token Invalid",
                 data: null,
             });
         }
@@ -218,10 +227,12 @@ module.exports = {
 
             const username = findEmail.dataValues.username;
 
+            const resetToken = createResetToken({ id: findEmail.dataValues.id });
+
             const template = await fs.readFile(path.resolve(__dirname, '../template/resetPassword.html'), 'utf-8')
             const templateToCompile = await handlebars.compile(template);
             const newTemplate = templateToCompile({
-                username, url: `${process.env.CLIENT_BASE_URL || 'https://jcwd230204.purwadhikabootcamp.com'}/user/resetPassword/${findEmail.dataValues.id}`,
+                username, url: `${process.env.CLIENT_BASE_URL || 'https://jcwd230204.purwadhikabootcamp.com'}/user/resetPassword/${resetToken}`,
             });
 
             await transporter.sendMail({
@@ -237,9 +248,10 @@ module.exports = {
                 data: null,
             });
         } catch (error) {
+            console.error("forgotPassword error:", error)
             res.status(404).send({
                 isError: true,
-                message: error.message,
+                message: "Forgot Password Failed",
                 data: null,
             });
         }
@@ -247,12 +259,31 @@ module.exports = {
 
     resetPassword: async (req, res) => {
         try {
-            let { id } = req.params;
+            let { token } = req.params;
             let { password, confirmPassword } = req.body;
+
+            if (!token) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "Reset token is required",
+                    data: null
+                })
+            }
+
+            let payload;
+            try {
+                payload = validateToken(token);
+            } catch (err) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "Reset token is invalid or has expired",
+                    data: null
+                })
+            }
 
             let findUser = await users.findOne({
                 where: {
-                    id
+                    id: payload.id
                 }
             })
 
@@ -264,7 +295,7 @@ module.exports = {
                 })
             }
 
-            if (!password.length&&!confirmPassword.length)
+            if (!password || !confirmPassword)
                 return res.status(404).send({
                     isError: true,
                     message: "Please Input Your Password",
@@ -275,15 +306,14 @@ module.exports = {
                 return res.status(404).send({
                     isError: true,
                     message: "Password Not Match",
-                    data: password,
-                    confirmPassword,
+                    data: null,
                 });
 
             await users.update(
                 { password: await hashPassword(password) },
                 {
                     where: {
-                        id: id,
+                        id: payload.id,
                     },
                 }
             );
@@ -295,9 +325,10 @@ module.exports = {
                 data: null,
             });
         } catch (error) {
+            console.error("resetPassword error:", error)
             res.status(500).send({
                 isError: true,
-                message: error.message,
+                message: "Reset Password Failed",
                 data: null,
             });
         }
@@ -360,9 +391,10 @@ module.exports = {
             });
 
         } catch (error) {
+            console.error("changePassword error:", error)
             res.status(500).send({
                 isError: true,
-                message: error.message,
+                message: "Change Password Failed",
                 data: null,
             });
         }
@@ -416,9 +448,10 @@ module.exports = {
             })
             
         } catch (error) {
+            console.error("getProfile error:", error)
             res.status(404).send({
                 isError: true,
-                message: error.message,
+                message: "Get Profile Failed",
                 data: null
             })
         }
@@ -430,7 +463,6 @@ module.exports = {
         const id = req.uid.id;
         try {
             const {name, gender, birthdate, email} = req.body;
-            console.log(name, gender, birthdate, id);
 
             let findUser = await db.users.findOne({
                 where: {id},
@@ -470,10 +502,11 @@ module.exports = {
 
         } catch (error) {
             await t.rollback()
+            console.error("updateProfile error:", error)
             res.status(404).send({
                 isError: true,
                 message: "Update profile failed",
-                data: error.message
+                data: null
             })
         }
     },
@@ -501,7 +534,7 @@ module.exports = {
                 })
             }
             
-            let ProfilePictPath = `Public/images/${req.profilePicture.filename}`
+            let ProfilePictPath = `Public/profile_picture/${req.profilePicture.filename}`
 
             let updateProfilePicture = await profiles.update({
                 profile_pic_url: ProfilePictPath
@@ -522,10 +555,11 @@ module.exports = {
 
         } catch (error) {
             await t.rollback()
+            console.error("uploadProfilePicture error:", error)
             res.status(404).send({
                 isError: true,
                 message: "Upload profile picture failed",
-                data: error.message
+                data: null
             })
         }
     }

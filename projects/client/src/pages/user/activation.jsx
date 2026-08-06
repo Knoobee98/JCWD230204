@@ -8,7 +8,6 @@ import Footer from "../../components/footer";
 export default function Activation(){
     const Navigate = useNavigate()
     const Location = useLocation()
-    console.log(Location.pathname.slice(12))
 
     const confirm = async() => {
         try {
@@ -18,7 +17,6 @@ export default function Activation(){
                 Navigate("/user/login")
             }, 3000)
         } catch (error) {
-            console.log(error)  
         }
     }
 

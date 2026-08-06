@@ -35,7 +35,7 @@ module.exports = {
             const { email, password, } = req.body
 
             // step 2: validasi
-            if(!email.length || !password.length)
+            if(!email || !password)
             return res.status(404).send({
                 isError: true,
                 message: 'Input is required',
@@ -76,6 +76,7 @@ module.exports = {
                 id: findEmail.dataValues.id,
                 username: findEmail.dataValues.email,
                 status: findEmail.dataValues.role,
+                role: findEmail.dataValues.role,
             });
 
             // step 6 : kirim response
@@ -86,10 +87,11 @@ module.exports = {
             })
 
         } catch (error) {
+            console.error("login error:", error)
             res.status(404).send({
                 isError: true, 
                 message: "Login Failed", 
-                data: error
+                data: null
             })
         }
     },
@@ -98,7 +100,7 @@ module.exports = {
         try {
             let {email, password} = req.body;
 
-            if(!email.length || !password.length)
+            if(!email || !password)
                 return res.status(404).send({
                     isError: true,
                     message: "Input must be filled",
@@ -131,10 +133,11 @@ module.exports = {
                 });
 
         } catch (error) {
+            console.error("registerbranchadmin error:", error)
             res.status(404).send({
 				isError: true,
 				message: "Register Failed",
-				data: error.message,
+				data: null,
 			});   
         }
     },
@@ -156,11 +159,11 @@ module.exports = {
             })
 
         } catch (error) {
-            
+            console.error("getTransactionUser error:", error)
             res.status(400).send({
                 isError: true,
                 message: "Get Transaction Failed",
-                data: error.message,
+                data: null,
             })
         }
 
@@ -171,7 +174,38 @@ module.exports = {
         const { id: transactionId } = req.params;
 
         try {
-            
+            if (!transactionId) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "Transaction id is required",
+                    data: null,
+                })
+            }
+
+            if (!transactionStatus) {
+                return res.status(404).send({
+                    isError: true,
+                    message: "Transaction Status is required",
+                    data: null,
+                })
+            }
+
+            const statusMap = {
+                "Confirm Payment": 3,
+                "delivery": 4,
+                "cancel": 6,
+            }
+
+            const nextStatusId = statusMap[transactionStatus];
+
+            if (!nextStatusId) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "Invalid transaction status",
+                    data: null,
+                })
+            }
+
             const findTransactionStatus = await transaction.findOne({
                 where: {
                     id: transactionId
@@ -186,33 +220,11 @@ module.exports = {
                 })
             }
 
-            if(!transactionStatus){
-                return res.status(404).send({
-                    isError: true,
-                    message: "Transaction Status is required",
-                    data: null,
-                })
-            }
-
-            if(transactionStatus === "Confirm Payment"){
-                await transaction.update({
-                    transaction_status_id: 3,
-                }, {
-                    where: { id: transactionId }
-                })
-            } else if(transactionStatus === "delivery"){
-                await transaction.update({
-                    transaction_status_id: 4,
-                }, {
-                    where: { id: transactionId }
-                })
-            } else if(transactionStatus === "cancel"){
-                await transaction.update({
-                    transaction_status_id: 6,
-                }, {
-                    where: { id: transactionId }
-                })
-            }
+            await transaction.update({
+                transaction_status_id: nextStatusId,
+            }, {
+                where: { id: transactionId }
+            })
 
             res.status(200).send({
                 isError: false,
@@ -221,10 +233,11 @@ module.exports = {
             })
             
         } catch (error) {
+            console.error("updateTransactionStatus error:", error)
             res.status(404).send({
                 isError: true,
                 message: "Update Transaction Status Failed",
-                data: error.message,
+                data: null,
             })
         }
     },
@@ -260,39 +273,17 @@ module.exports = {
             })
 
         } catch (error) {
+            console.error("getAllProducts error:", error)
             res.status(404).send({
                 isError: true,
                 message: "Get All Products Failed",
-                data: error.message,
+                data: null,
             })
         }
     },
 
     getBranchProducts: async(req, res) => {
-        const id = req.params.id;
         try {
-            // const findAdmin = await admin.findOne({
-            //     where: {
-            //         id
-            //     }
-            // })
-
-            // if(!findAdmin) {
-            //     res.status(404).send({
-            //         isError: true,
-            //         message: "Admin Not Found",
-            //         data: null,
-            //     })
-            // }
-
-            // if(findAdmin.status !== "branch admin"){
-            //     res.status(404).send({
-            //         isError: true,
-            //         message: "You are not branch admin",
-            //         data: null,
-            //     })
-            // }
-
             const findBranchProducts = await products.findAll({
                 attributes: ['id', 'products_name'],
                 include: [
@@ -319,10 +310,11 @@ module.exports = {
 
             
         } catch(error) {
+            console.error("getBranchProducts error:", error)
             res.status(400).send({
                 isError: true,
                 message: "Get Branch Products Failed",
-                data: error.message,
+                data: null,
             })
         }
     },
@@ -331,6 +323,14 @@ module.exports = {
         const t = await sequelize.transaction()
         try {
             const { product_name, product_desc, product_category, product_price, product_stock, branch_id } = req.body;
+
+            if (!product_name || !product_desc || !product_category || !product_price || !product_stock || !branch_id) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "All fields are required (product_name, product_desc, product_category, product_price, product_stock, branch_id)",
+                    data: null,
+                })
+            }
 
             let productCategory = await categoryProducts.findOne({
                 where: { category: product_category }
@@ -370,36 +370,20 @@ module.exports = {
             })
             
         } catch (error) {
-
             await t.rollback()
+            console.error("createProduct error:", error)
             res.status(404).send({
                 isError: true,
                 message: "Create Product Failed",
-                data: error.message,
+                data: null,
             })
         }
     },
 
     uploadProductImage: async(req, res) => {
         const t = await sequelize.transaction()
-        const {admin_id} = req.params
         const {product_id} = req.body
         try {
-            const findAdmin = await admin.findOne({
-                where: {
-                    id: admin_id,
-                    role: "branch admin"
-                }
-            })
-
-            if(!findAdmin){
-                return res.status(404).send({
-                    isError: true,
-                    message: "Admin Not Found",
-                    data: null,
-                })
-            }
-
             const findProduct = await products.findOne({
                 where: {
                     id: product_id
@@ -414,16 +398,15 @@ module.exports = {
                 })
             }
 
-            if(!req.files){
+            if(!req.files || !req.files.products_images || !req.files.products_images.length){
                 return res.status(404).send({
                     isError: true,
                     message: "Image Not Found",
                     data: null,
                 })
             }
-            console.log(req.files)
-            const productImagePath = `Public/images/${req.files.products_images[0].filename}`
-            console.log(productImagePath)
+
+            const productImagePath = `Public/products_images/${req.files.products_images[0].filename}`
 
             const uploadProductImage = await productsImage.update({
                 url: productImagePath,
@@ -443,10 +426,11 @@ module.exports = {
 
         } catch (error) {
             await t.rollback()
+            console.error("uploadProductImage error:", error)
             res.status(400).send({
                 isError: true,
                 message: "Upload Product Image Failed",
-                data: error.message,
+                data: null,
             })
         }
 
@@ -527,12 +511,12 @@ module.exports = {
             })
 
         } catch (error) {
-            
             await t.rollback();
+            console.error("updateProduct error:", error)
             res.status(404).send({
                 isError: true,
                 message: "Update Failed",
-                data: error.message,
+                data: null,
             })
         }
     },
@@ -541,6 +525,14 @@ module.exports = {
         const t = await sequelize.transaction()
         try {
             const {product_id} = req.body;
+
+            if (!product_id) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "product_id is required",
+                    data: null,
+                })
+            }
 
             const findProduct = await products.findOne({
                 where: {
@@ -555,6 +547,41 @@ module.exports = {
                     data: null,
                 })
             }
+
+            await productsDetail.destroy({
+                where: { product_id },
+                transaction: t
+            })
+
+            await productsImage.destroy({
+                where: { product_id },
+                transaction: t
+            })
+
+            await branchProducts.destroy({
+                where: { product_id },
+                transaction: t
+            })
+
+            await stockHistory.destroy({
+                where: { product_id },
+                transaction: t
+            })
+
+            await discount.destroy({
+                where: { product_id },
+                transaction: t
+            })
+
+            await db.carts.destroy({
+                where: { product_id },
+                transaction: t
+            })
+
+            await db.wishlists.destroy({
+                where: { product_id },
+                transaction: t
+            })
 
             const deleteProduct = await products.destroy({
                 where: { id: product_id },
@@ -571,12 +598,12 @@ module.exports = {
 
             
         } catch (error) {
-
             await t.rollback()
+            console.error("deleteProduct error:", error)
             res.status(404).send({
                 isError: true,
                 message: "Delete Failed",
-                data: error.message,
+                data: null,
             })
         }
     },
@@ -584,6 +611,14 @@ module.exports = {
     getStockHistory: async(req, res) => {
         try {
             const {product_id} = req.query;
+
+            if (!product_id) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "product_id is required",
+                    data: null,
+                })
+            }
 
             const findStockHistory = await stockHistory.findAll({
                 where: {
@@ -598,10 +633,11 @@ module.exports = {
             })
 
         } catch (error) {
+            console.error("getStockHistory error:", error)
             res.status(404).send({
                 isError: true,
                 message: "Get Stock History Failed",
-                data: error.message,
+                data: null,
             })
         }
     },
@@ -618,10 +654,11 @@ module.exports = {
                 data: findDiscounts,
             })
         } catch (error) {
+            console.error("getDiscounts error:", error)
             res.status(400).send({
                 isError: true,
                 message: "Get Discounts Failed",
-                data: error.message,
+                data: null,
             })
         }
     },
@@ -632,6 +669,14 @@ module.exports = {
         const {admin_id} = req.params
         const resolvedAdminId = admin_id === 'me' || !admin_id ? req.uid.id : admin_id;
         try{
+
+            if (!discount_name || !discount_type || !discount_value || !product_id || !days) {
+                return res.status(400).send({
+                    isError: true,
+                    message: "discount_name, discount_type, discount_value, product_id and days are required",
+                    data: null,
+                })
+            }
 
             const findAdmin = await admin.findByPk(resolvedAdminId)
             if(!findAdmin){
@@ -646,14 +691,14 @@ module.exports = {
             const productIds = Array.isArray(product_id) ? product_id : [product_id]
             const discounts = []
 
-            for(const product_id of productIds){
+            for(const productId of productIds){
                 const newDiscount = {
                     name: discount_name,
                     type: discount_type,
                     voucher_value: discount_value,
                     expiry_date: expiry_date,
                     admin_id: resolvedAdminId,
-                    product_id: product_id
+                    product_id: productId
                 };
 
                 discounts.push(newDiscount)
@@ -672,10 +717,11 @@ module.exports = {
         } catch(error){
 
             await t.rollback()
+            console.error("createDiscount error:", error)
             res.status(400).send({
                 isError: true,
                 message: "Create Discount Failed",
-                data: error.message,
+                data: null,
             })
 
         }
@@ -684,18 +730,20 @@ module.exports = {
     checkStatus: async(req, res ) => {
         const adminId = req.uid.id
         const status = req.uid.status
+        const role = req.uid.role || status
         const username = req.uid.username
         try {
             res.status(200).send({
                 isError: false,
                 message: "Check Status Success",
-                data: {status, username}
+                data: {role, username}
             })
         } catch (error) {
+            console.error("checkStatus error:", error)
             res.status(400).send({
                 isError: true,
                 message: "Check Status Failed",
-                data: error.message
+                data: null
             })
             
         }

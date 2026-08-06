@@ -24,6 +24,15 @@ module.exports = {
     const id = req.uid.id;
     let findTransaction;
     try {
+
+      if ((filterBy === "orderStatus" || filterBy === "invoice") && !query) {
+        return res.status(400).send({
+          isError: true,
+          message: "query is required for this filter",
+          data: null,
+        });
+      }
+
       const findUser = await users.findOne({
         where: { id },
       });
@@ -288,10 +297,11 @@ module.exports = {
         data: findTransaction,
       });
     } catch (error) {
+      console.error("getTransaction error:", error)
       res.status(500).send({
         isError: true,
         message: "get transaction failed",
-        data: error.message,
+        data: null,
       });
     }
   },
@@ -312,6 +322,14 @@ module.exports = {
 
     try {
       const id = req.uid.id;
+
+      if (!address || !city || !zip || !shipping || !total || !latitude || !longitude) {
+        return res.status(400).send({
+          isError: true,
+          message: "address, city, zip, shipping, total, latitude and longitude are required",
+          data: null,
+        });
+      }
 
       //check user
       const findUser = await users.findOne({
@@ -341,7 +359,6 @@ module.exports = {
 
       //set unique transaction id
       const transactionId = nanoid(13);
-      // console.log(transactionId);
 
       const lat = parseFloat(latitude);
       const lng = parseFloat(longitude);
@@ -391,8 +408,6 @@ module.exports = {
       if(findStores.length > 0){
         const storeId = findStores[0].dataValues.id;
 
-        console.log(id, storeId)
-
         //get cart
         const cartItems = await cart.findAll({
             where: {
@@ -411,10 +426,16 @@ module.exports = {
             exclude: ['createdAt', 'updatedAt']
         })
 
-        console.log(cartItems)
+        if (!cartItems.length) {
+          await t.rollback();
+          return res.status(400).send({
+            isError: true,
+            message: "your cart is empty",
+            data: null,
+          });
+        }
 
         for (const cartItem of cartItems) {
-          // console.log(cartItem)
           const product = await branchProducts.findOne({
             where: { product_id: cartItem.product.id, branch_id: storeId },
           })
@@ -422,6 +443,15 @@ module.exports = {
           if(product){
             const newStock = product.stock - cartItem.qty;
             const previousStock = product.stock;
+
+            if (newStock < 0) {
+              await t.rollback();
+              return res.status(400).send({
+                isError: true,
+                message: `insufficient stock for ${cartItem.product.products_name}`,
+                data: null,
+              });
+            }
 
             await product.update({ stock: newStock }, { transaction: t });
 
@@ -460,16 +490,15 @@ module.exports = {
 
         // Create TransactionDetail for each item in the cart
         for (const cartItem of cartItems) {
+          const productDetail = cartItem.dataValues.product.dataValues.products_details &&
+            cartItem.dataValues.product.dataValues.products_details[0];
           const transactionDetail = await TransactionDetail.create({
             product_name: cartItem.dataValues.product.dataValues.products_name,
             qty: cartItem.qty,
-            total_price: cartItem.dataValues.product.dataValues.products_details[0].dataValues.price * cartItem.qty,
+            total_price: productDetail ? productDetail.dataValues.price * cartItem.qty : 0,
             transaction_id: transaction.id
           }, { transaction: t });
         }
-
-        console.log('Stock updated and StockHistory created for closest store:', findStores[0].dataValues.branch_name);
-        console.log('TransactionLog and TransactionDetails created for the entire transaction');
 
       } else {
         await t.rollback();
@@ -498,7 +527,7 @@ module.exports = {
       res.status(400).send({
         isError: true,
         message: "add transaction failed",
-        data: error.message,
+        data: null,
       });
     }
   },
@@ -574,10 +603,11 @@ module.exports = {
       if (t.finished !== "commit") {
         await t.rollback();
       }
+      console.error("uploadPaymentProof error:", error)
       res.status(400).send({
         isError: true,
         message: "upload payment proof failed",
-        data: error.message,
+        data: null,
       });
     }
   },
@@ -644,10 +674,11 @@ module.exports = {
         data: findTransaction,
       });
     } catch (error) {
+      console.error("cancelOrder error:", error)
       res.status(404).send({
         isError: true,
         message: "cancel order failed",
-        data: error.message,
+        data: null,
       });
     }
   },
@@ -713,10 +744,11 @@ module.exports = {
         data: null,
       });
     } catch (error) {
+      console.error("confirmOrder error:", error)
       res.status(400).send({
         isError: true,
         message: "confirm order failed",
-        data: error.message,
+        data: null,
       });
     }
   },

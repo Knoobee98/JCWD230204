@@ -13,10 +13,8 @@ export default function Profile() {
                     token: localStorage.getItem('token')
                 }
             })
-            console.log(response.data.data[0])
             setProfile(response.data.data[0])
         } catch (error) {
-            console.log(error.message)
         }
     }
 

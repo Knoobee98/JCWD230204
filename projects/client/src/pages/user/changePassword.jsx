@@ -39,7 +39,6 @@ export default function ChangePassword (){
                     token: localStorage.getItem("token"),
                 }}
 			);
-            console.log(data)
 			toast.success(data.data.message);
 			newPassword.current.value = ''
 			confirmPassword.current.value = ''

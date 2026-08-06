@@ -17,10 +17,8 @@ export default function ProductDetails(){
         try {
             const url = process.env.REACT_APP_API_GET_PRODUCTS_DETAIL.replace(":id", id)
             const response = await api.get(url)
-            console.log(response.data.data)
             setProduct(response.data.data)
         } catch (error) {
-            console.log(error)
         }
     }
 
@@ -29,7 +27,6 @@ export default function ProductDetails(){
             const response = await api.get(process.env.REACT_APP_API_GET_CATEGORY)
             setCategory(response.data.data)
         } catch(error){
-            console.log(error.message)
         }
     }
 
@@ -45,10 +42,9 @@ export default function ProductDetails(){
 
     const addToCartHandler = async() => {
         try {
-            console.log(quantity)
             const token = localStorage.getItem("token")
             const url = process.env.REACT_APP_API_ADD_TO_CART.replace(":id", id).replace(":quantity", parseInt(quantity));
-            const response = await api.get(url, {
+            const response = await api.post(url, {}, {
                 headers: { token }
             })
             toast.success(response.data.message)

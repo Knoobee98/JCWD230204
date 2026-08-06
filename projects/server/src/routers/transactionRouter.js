@@ -8,6 +8,6 @@ router.get('/get', tokenVerify, transactionController.getTransaction);
 router.post('/order', tokenVerify, transactionController.addTransaction);
 router.post('/uploadPayment/:transaction_id', tokenVerify, uploadPaymentImage, transactionController.uploadPaymentProof);
 router.patch('/cancel', tokenVerify, transactionController.cancelOrder);
-router.get('/confirmOrder', tokenVerify, transactionController.confirmOrder);
+router.patch('/confirmOrder', tokenVerify, transactionController.confirmOrder);
 
 module.exports = router;

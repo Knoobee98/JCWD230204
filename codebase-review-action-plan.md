@@ -1,132 +1,101 @@
 # Codebase Review and Action Plan
 
-Reviewed on: 2026-08-06
+Reviewed on: 2026-08-06 | Status updated: 2026-08-06
 
 ## 1. Executive Summary
 
-This repository is a monorepo for a React client and an Express/Sequelize backend. The overall structure is clear and the app already contains a substantial set of user and admin pages, but the current codebase needs stabilization before feature work can proceed smoothly.
+This repository is a monorepo for a React client (`projects/client`) and an Express/Sequelize backend (`projects/server`). The stabilization pass described below is complete for the agreed scope: build fixes, security hardening, error sanitization, dead-code removal, and an initial automated test suite. Remaining work is limited to items that were blocked or intentionally deferred (see §5).
 
-The most important verified blocker is the frontend production build. A fresh build attempt failed on Windows because the build script uses Unix-style environment syntax that does not work in the default Windows command shell.
+## 2. Work Completed
 
-## 2. What I Reviewed
+### 2.1 Committed baseline (commit `2071e24` — "Phase C")
 
-- Root workspace configuration in [package.json](package.json)
-- Client app entry points and routing in [projects/client/src/App.js](projects/client/src/App.js)
-- Server startup and API wiring in [projects/server/src/index.js](projects/server/src/index.js)
-- Client package setup in [projects/client/package.json](projects/client/package.json)
-- Server package setup in [projects/server/package.json](projects/server/package.json)
+- Centralized API client usage; aligned client requests with server response shapes.
+- Added route protection for admin/user routes on both client and server.
+- Added server-side role authentication and input validation.
+- Client build unblocked on Windows via `cross-env` in the build script.
 
-## 3. Verified Findings
+### 2.2 Security and correctness fixes (this commit)
 
-### 3.1 Build blocker (high priority)
+- **Error sanitization** — `usersController.js`, `adminController.js`, `productsController.js`, `transactionController.js`, `rajaOngkirAPI.js`, `openCageAPI.js` no longer leak raw `error.message` / DB errors to clients.
+- **Guard clauses** — removed unsafe property access that could throw (`!email.length`, missing `products_details[0]`, null `productDetail`) across controllers.
+- **Reset-password flow** — server now emails a signed JWT (`createResetToken`, 1h expiry) in the reset URL instead of a raw user id; client `resetPassword.jsx` no longer sends the id in the body.
+- **Safe HTTP methods** — state-changing routes converted from GET to safe methods:
+  - `/api/products/add` GET → POST
+  - `/api/products/update` GET → PATCH
+  - `/api/transaction/confirmOrder` GET → PATCH
+  - Clients updated to match (`productDetails.jsx`, `cartPage.jsx`, `transactionList.jsx`).
+- **Role claims** — `createToken` now includes a `role` claim; `requireRole` middleware checks `req.uid.role` with fallback to `req.uid.status`; `RequireAuth.jsx` verifies admin roles (`super admin`, `branch admin`) via `/api/admin/checkStatus`.
+- **File upload hardening** — `middleware/upload.js` guards missing `req.files` and removes oversized files; upload paths fixed to `Public/profile_picture` and `Public/products_images`.
+- **Secrets** — removed `console.log(process.env.RAJAONGKIR_API_KEY)`; `.gitignore` now ignores `projects/server/.env`, `.env`, and `projects/client/build/`.
+- **Deferred auth check** — admin `keepLogin`/`checkStatus` guards added for register/login edge cases.
+- **JWT fallback** — `JWT_SECRET` falls back to `dev-only-change-me` only outside production; throws in production when unset.
 
-I ran the workspace build command:
+### 2.3 Debug logging removal
 
-```bash
-npm run build
-```
+- Removed ~56 live `console.log/error/warn` statements across 15 client files.
+- Removed remaining server `console.log` statements from controllers; only intentional startup logging remains in `src/index.js`.
 
-Result:
-- The build failed in the client package.
-- The error came from the script `DISABLE_ESLINT_PLUGIN=true react-scripts build` being executed in Windows `cmd`, where the syntax is not recognized.
+### 2.4 Dead-code removal
 
-Impact:
-- The project cannot currently produce a production build from the Windows environment used here.
-- This blocks deployment validation and makes it harder to ship changes confidently.
+Deleted 44 tracked files after verifying each had zero importers/usages:
 
-### 3.2 Routing and app structure
+- `src/charts/` — BarChart05/06, LineChart05-09, PieChart (8)
+- `src/components/` — AccordionBasic, AccordionTableItem, AccordionTableRichItem, Banner, Banner2, cards-skeleton, DropdownClassic, DropdownFull, DropdownSort, DropdownSwitch, Modal, ModalAction, ModalBasic, ModalBlank, ModalCookies, Notification, PaginationNumeric2, profileModal, Toast, Toast2, Toast3 (22)
+- `src/partials/inventory/` — ShopCards01-06, pHistoryTableItem, pStocksTableItem (8)
+- `src/pages/admin/` — branchAdmin, branchregister (unrouted; sidebaradmin removed as its only importer)
+- Stray files — `client/db.json`, `client/src/db/db.json`, `client/src/logo.svg`, root `.DS_Store`; untracked `package-lock.json.bak` removed.
 
-The client already has a large route map for both user and admin flows, which is a good foundation. However, there are some areas that should be cleaned up:
+### 2.5 Automated tests
 
-- Duplicate route definitions for the user profile/edit flow in [projects/client/src/App.js](projects/client/src/App.js)
-- Separate admin and user page structures are present, but route protection and role-based access are not yet clearly enforced
+Added jest + supertest suite in `projects/server/src/__tests__/`:
 
-### 3.3 Backend structure
+- `jwtoken.test.js` — token creation/validation, 1d vs 1h expiry, tampered-token rejection.
+- `tokenMiddleware.test.js` — `tokenVerify` and `requireRole` behavior (unit, mocked req/res).
+- `routes.test.js` — API smoke tests: `/api/greetings`, 404 handling, safe-method conversion, and protected routes rejecting missing tokens before touching the DB.
 
-The server entry point in [projects/server/src/index.js](projects/server/src/index.js) is already wiring the main API routers and serving the built client. This is a solid base, but the backend would benefit from:
+Run with `npm test` from `projects/server` (all 19 tests pass).
 
-- clearer error handling
-- consistent API response formats
-- reduced debug logging in production code
-- stronger authentication/authorization checks for admin operations
+## 3. Verification Performed
 
-### 3.4 Code quality and maintainability
+- `npm run build` in `projects/client` → "Compiled successfully" after all deletions and logging cleanup.
+- Server boot check on port 8000 → `GET /api/greetings` returns `200 {"message":"Hello, Student !"}`.
+- `npm test` in `projects/server` → 3 suites, 19 tests passing.
 
-The codebase contains many `console.log` statements across the client and server. These are useful during development but should be removed or gated behind a debug setting before the app is considered production-ready.
+## 4. Blocked / Deferred
 
-## 4. Recommended Action Plan
+- **DB smoke test** — blocked: no MySQL credentials available for the local database.
+- **Unreferenced image assets** — deferred by decision: ~110 files under `src/images/` and `src/assets/img` remain; removal is lower-value and higher-risk to verify than code.
+- **Jest/CI wiring at workspace root** — the root `npm test` (lerna) will run the server suite; a client test pass and a CI pipeline are still outstanding.
 
-### Phase 1 — Stabilize the app immediately (1-2 days)
+## 5. Remaining Action Plan
 
-1. Fix the Windows build issue
-   - Replace the current build script with a cross-platform solution such as `cross-env`.
-   - Example approach:
-     - install `cross-env`
-     - update the build script to `cross-env DISABLE_ESLINT_PLUGIN=true react-scripts build`
+### Phase A — Environment and deployment readiness
 
-2. Validate environment setup
-   - Ensure `.env` values are documented for the server.
-   - Confirm DB credentials, port, and external API keys are configured correctly.
+1. Provision MySQL credentials (local `.env` documented, not committed).
+2. Run a full DB smoke test: register → activate → login → browse products → add to cart → checkout → confirm order.
+3. Add a CI pipeline (install, lint, test, build) on push/PR.
 
-3. Clean up major routing issues
-   - Remove duplicate route entries.
-   - Review admin/user route access and define protected routes.
+### Phase B — Correctness and hardening
 
-### Phase 2 — Improve reliability and maintainability (2-3 days)
+1. Add client-side tests (at minimum for `RequireAuth.jsx` and the API client).
+2. Standardize response envelope on any remaining routes that deviate from `{ isError, message, data }`.
+3. Review pagination/sorting consistency across admin tables.
 
-1. Standardize API error handling
-   - Return consistent JSON error responses from the backend.
-   - Avoid leaking raw database or runtime errors to the client.
+### Phase C — Cleanup
 
-2. Remove or gate debug logging
-   - Replace noisy `console.log` statements with structured logging or remove them in production.
+1. Remove unreferenced image assets under `src/images/` and `src/assets/img`.
+2. Gate or remove the remaining startup logging in `src/index.js` (optional).
 
-3. Strengthen authentication flow
-   - Add clearer handling for expired tokens.
-   - Protect sensitive pages on both user and admin sides.
+### Phase D — Feature roadmap
 
-### Phase 3 — Feature development roadmap (1-2 weeks)
+1. Product management improvements (CRUD, image validation).
+2. Transaction/payment flow polish (status history, clearer admin actions).
+3. Sales reporting and inventory dashboards with filters/search/pagination.
 
-1. Product management improvements
-   - Add product CRUD flow for admin users.
-   - Improve image upload handling and validation.
+## 6. Suggested Implementation Order
 
-2. Transaction and payment flow
-   - Improve order confirmation and payment proof handling.
-   - Add transaction status update history and clearer admin actions.
-
-3. Admin reporting and dashboard enhancements
-   - Improve sales reporting and inventory visibility.
-   - Add filters, search, and pagination to large admin tables.
-
-### Phase 4 — Quality assurance and deployment readiness
-
-1. Add automated tests
-   - Introduce unit and integration tests for key user flows.
-   - Add at least one smoke test for login, product listing, and checkout.
-
-2. Add CI pipeline
-   - Run install, build, and test steps automatically on every push or pull request.
-
-3. Improve documentation
-   - Add setup instructions for frontend, backend, database, and environment variables.
-
-## 5. Suggested Implementation Order
-
-1. Fix the current build blocker
-2. Make the app run reliably in development and production
-3. Harden auth and route protection
-4. Clean up debug code and API responses
-5. Implement the next feature set for products, transactions, and admin reporting
-
-## 6. Recommended Next Steps
-
-If you want to move quickly, the best first sprint should be:
-
-- fix the build script
-- verify the client and server start correctly
-- add route protection for admin pages
-- remove the most obvious debug logging
-- add a basic test setup
-
-That sequence will give you a more stable base before adding more features.
+1. Provision credentials and run the DB smoke test (Phase A).
+2. Add CI (Phase A) and client tests (Phase B).
+3. Image-asset cleanup (Phase C).
+4. Continue feature work on products, transactions, and reporting (Phase D).

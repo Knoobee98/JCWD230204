@@ -24,12 +24,10 @@ export default function TransactionList() {
                     token: localStorage.getItem('token')
                 }
             })
-            console.log(response.data.data)
             setTransactionList(response.data.data)
             //paginations
             
         } catch (error) {
-            console.log(error.message)
         }
         
     }
@@ -38,17 +36,15 @@ export default function TransactionList() {
         try {
             Navigate(`/user/uploadPayment/${id}`)
         } catch (error) {
-            console.log(error.message)
         }
     }
 
     const confirmOrder = async(id) => {
         try {
-            await api.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/confirmOrder?id=${id}`, {
+            await api.patch(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/confirmOrder?id=${id}`, {}, {
                 headers: {token: localStorage.getItem('token')}
             })
         } catch (error) {
-            console.log(error.message)
         }
     }
 
@@ -68,7 +64,6 @@ export default function TransactionList() {
             })
             setTransactionList(response.data.data)
         } catch (error) {
-            console.log(error.message)
         }
     }
 
@@ -82,13 +77,11 @@ export default function TransactionList() {
             })
             setTransactionList(response.data.data)
         } catch (error) {
-            console.log(error.message)
         }
     }
 
     const filterHandlerByDate = async() => {
         try {
-            console.log(startDate, endDate)
             moment(startDate).format('YYYY-MM-DD')
             moment(endDate).format('YYYY-MM-DD')
             const response = await api.get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/get?filterBy=${filterBy}&startDate=${startDate}&endDate=${endDate}`, {
@@ -98,13 +91,11 @@ export default function TransactionList() {
             })
             setTransactionList(response.data.data)
         } catch (error) {
-            console.log(error.message)
         }
     }
 
     return(
         <>
-        {console.log(startDate, endDate)}
         <div className='flex flex-col gap-5'>
             <h1>Transaction List</h1>
             <div className='flex gap-2'>

@@ -21,9 +21,7 @@ export default function EditProfileForm(){
                     token: localStorage.getItem('token')
                 }
             })
-            console.log(result.data.message)
         }catch (error){
-            console.log(error)
         }
     }
     return(

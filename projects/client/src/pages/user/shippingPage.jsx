@@ -39,10 +39,8 @@ export default function CheckoutPage(){
             })
             // console.log(response.data.data.totalAfterDiscount)
             setSubtotal(response.data.totalAfterDiscount)
-            console.log(subtotal)
             
         } catch (error) {
-            console.log(error.message)
         }
     }
 
@@ -63,12 +61,10 @@ export default function CheckoutPage(){
             }, {
                 headers: {token}
             })
-            console.log(response.data.data)
             toast("Order Placed")
             Navigate(`/user/uploadPayment/${response.data.data.id}`)
         }
         catch(error){
-            console.log(error.message)
         }
 
     }
@@ -76,22 +72,18 @@ export default function CheckoutPage(){
     const getCity = async() => {
         try {
             const response =await api.get(process.env.REACT_APP_API_RAJAONGKIR_CITY)
-            console.log(response.data.data)
             setCity(response.data.data)
 
         } catch (error) {
-            console.log(error.message)
         }
     }
 
     const getProvince = async() => {
         try {
             const response =await api.get(process.env.REACT_APP_API_RAJAONGKIR_STATE)
-            console.log(response.data.data)
             setState(response.data.data)
 
         } catch (error) {
-            console.log(error.message)
 
         }
     }
@@ -104,11 +96,9 @@ export default function CheckoutPage(){
                 weight: 1700,
                 courier: courier
             })
-            console.log(response.data.data[0].costs)
             setService(response.data.data[0].costs)
             
         } catch (error) {
-            console.log(error.message)
         }
 
     }
@@ -118,8 +108,6 @@ export default function CheckoutPage(){
             navigator.geolocation.getCurrentPosition((position) => {
                 setLatitude(position.coords.latitude)
                 setLongitude(position.coords.longitude)
-                console.log(latitude)
-                console.log(longitude)
             })
         }else{
             alert('Geolocation is not supported by this browser')

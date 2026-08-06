@@ -27,11 +27,11 @@ export default function ResetPassword (){
 		try {
 			setDisabled(true);
 
-			const userId = location.pathname.split('/').pop();
+			const resetToken = location.pathname.split('/').pop();
 			let { data } = await api.patch(
-				`${process.env.REACT_APP_API_BASE_URL}/api/users/resetPassword/${userId}`,
+				`${process.env.REACT_APP_API_BASE_URL}/api/users/resetPassword/${resetToken}`,
 
-				{ id: userId, password: password.current.value, confirmPassword: confirmPassword.current.value }
+				{ password: password.current.value, confirmPassword: confirmPassword.current.value }
 			);
 
 			toast.success(data.message);

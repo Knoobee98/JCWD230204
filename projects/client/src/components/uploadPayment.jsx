@@ -24,14 +24,12 @@ export default function UploadPayment() {
                     token: token
                 }
             })
-            console.log(response)
             toast("upload payment successful")
             setTimeout(() => {
                 Navigate('/')
             }, 1000)
             
         } catch (error) {
-            console.log(error)
         }
         
 

@@ -28,7 +28,6 @@ export default function ProductPage(){
             setProducts(response.data.data)
             setTotalPages(response.data.totalPages || 1)
         } catch (error) {
-            console.log(error)
         }
     }
 
@@ -37,7 +36,6 @@ export default function ProductPage(){
             const response = await api.get(process.env.REACT_APP_API_GET_CATEGORY)
             setCategory(response.data.data)
         } catch(error){
-            console.log(error.message)
         }
     }
 
@@ -48,16 +46,13 @@ export default function ProductPage(){
 
     const handleFilter = async() => {
         const inputSearch = search.current.value;
-        console.log(filter, inputSearch)
         try{
             const url = process.env.REACT_APP_API_PRODUCTS_FILTER.replace(':filter', filter).replace(':inputSearch', inputSearch)
             const response = await api.get(url);
-            console.log(response.data.data)
             setProducts(response.data.data)
             setTotalPages(response.data.totalPages || 1)
             setPage(1)
         } catch (error) {
-            console.log(error.message)
         }
     }
 

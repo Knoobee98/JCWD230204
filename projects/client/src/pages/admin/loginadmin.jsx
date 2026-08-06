@@ -16,12 +16,10 @@ function Signin() {
 
 	let onLogin = async () => {
 		try {
-      console.log(email.current.value, password.current.value);
 			let response = await api.post(`${process.env.REACT_APP_API_BASE_URL}/api/admin/login`, {
 				email: email.current.value,
 				password: password.current.value,
 			});
-      console.log(response.data)
       const token = response.data.data
 			localStorage.setItem("token", token);
 			toast.success("login success");
@@ -62,7 +60,7 @@ function Signin() {
             </div>
 
             <div className="max-w-sm mx-auto px-4 py-8">
-              <h1 className="text-3xl text-slate-800 font-bold mb-6">Welcome back, Min! ✨</h1>
+              <h1 className="text-3xl text-slate-800 font-bold mb-6">Welcome back, Min! âœ¨</h1>
               
               {/* Form */}
               <div>

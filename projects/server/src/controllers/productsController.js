@@ -103,7 +103,6 @@ module.exports = {
                 ],
                 where: {id: id}
               });
-            console.log(findProductDetail)
             res.status(200).send({
                 isError: false,
                 message: "get detail success",
@@ -111,10 +110,11 @@ module.exports = {
             })
 
         } catch(error){
+            console.error("getProductDetail error:", error)
             res.status(404).send({
                 isError: true,
                 message: "get detail failed",
-                data: error.message
+                data: null
             })
         }
         
@@ -123,7 +123,6 @@ module.exports = {
     getCategory: async(req, res) => {
         try {
             let findCategory = await category.findAll()
-            console.log(findCategory)
 
             res.status(200).send({
                 isError: false,
@@ -132,10 +131,11 @@ module.exports = {
             })
 
         } catch (error) {
+            console.error("getCategory error:", error)
             res.status(404).send({
                 isError: true,
                 message: "get data failed",
-                data: error.message
+                data: null
             })
         }
     },
@@ -143,7 +143,6 @@ module.exports = {
     getPromo: async(req, res) => {
         try {
             let findPromo = await discounts_categories.findAll()
-            console.log(findPromo)
 
             res.status(201).send({
                 isError: false,
@@ -152,10 +151,11 @@ module.exports = {
             })
 
         } catch (error) {
+            console.error("getPromo error:", error)
             res.status(404).send({
                 isError: true,
                 message: "get data failed",
-                data: error.message
+                data: null
             })
         }
     },
@@ -183,7 +183,6 @@ module.exports = {
                     }
                 ]
             })
-            console.log(findNewProducts)
 
             res.status(200).send({
                 isError: false,
@@ -191,10 +190,11 @@ module.exports = {
                 data: findNewProducts
             })
         } catch (error) {
+            console.error("getNewProducts error:", error)
             res.status(404).send({
                 isError: true,
                 message: "get data failed",
-                data: error.message
+                data: null
             })
         }
     },
@@ -211,7 +211,6 @@ module.exports = {
                 order: [[sequelize.literal('count'), 'DESC']],
                 limit: 10
             })
-            console.log(findRecommendedProducts)
 
             res.status(200).send({
                 isError: false,
@@ -219,10 +218,11 @@ module.exports = {
                 data: findRecommendedProducts
             })
         } catch (error) {
+            console.error("getRecommendedProducts error:", error)
             res.status(404).send({
                 isError: true,
                 message: "get data failed",
-                data: error.message
+                data: null
             })
         }
     },
@@ -251,9 +251,13 @@ module.exports = {
             let totalPriceBeforeDiscount = 0
             let totalPriceAfterDiscount = 0
             findCart.forEach((item) => {
-                const productPrice = item.dataValues.product.dataValues.products_details[0].dataValues.price
+                const productDetail = item.dataValues.product.dataValues.products_details &&
+                    item.dataValues.product.dataValues.products_details[0]
+                if (!productDetail) return
+                const productPrice = productDetail.dataValues.price
                 const productQuantity = item.dataValues.qty
-                const discount = item.dataValues.product.dataValues.discounts[0]
+                const discount = item.dataValues.product.dataValues.discounts &&
+                    item.dataValues.product.dataValues.discounts[0]
                 const productPriceBeforeDiscount = productPrice * productQuantity
                 let discountAmount = 0
                 if(discount){
@@ -281,10 +285,11 @@ module.exports = {
             })
 
         } catch (error) {
+            console.error("getCart error:", error)
             res.status(400).send({
                 isError: true,
                 message: "get data failed",
-                data: error.message
+                data: null
             })
         }
     },
@@ -326,6 +331,20 @@ module.exports = {
                 })
             }
 
+            const findExistingProduct = await products.findOne({
+                where: {
+                    id: product_id
+                }
+            })
+
+            if(!findExistingProduct){
+                return res.status(404).send({
+                    isError: true,
+                    message: "product not found",
+                    data: null
+                })
+            }
+
             const findProducts = await cart.findOne({
                 where: {
                     product_id,
@@ -353,10 +372,11 @@ module.exports = {
             })
 
         } catch (error) {
+            console.error("addToCart error:", error)
             res.status(400).send({
                 isError: true,
                 message: "add to cart failed",
-                data: error.message
+                data: null
             })
         }
     },
@@ -390,10 +410,11 @@ module.exports = {
                 data: null
             })
         } catch (error) {
+            console.error("removeFromCart error:", error)
             res.status(400).send({
                 isError: true,
                 message: "remove from cart failed",
-                data: error.message
+                data: null
             })
         }
     },
@@ -471,10 +492,11 @@ module.exports = {
             })
 
         } catch (error) {
+            console.error("updateCart error:", error)
             res.status(400).send({
                 isError: true,
                 message: "update cart failed",
-                data: error.message
+                data: null
             })
         }
     }

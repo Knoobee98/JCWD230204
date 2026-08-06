@@ -18,10 +18,8 @@ export default function Profiling (){
             token: localStorage.getItem('token')
           }
         })
-        console.log(response.data.data)
         setDataProfile(response.data.data || [])
       } catch (error) {
-        console.log(error.message)
       }
     }
 

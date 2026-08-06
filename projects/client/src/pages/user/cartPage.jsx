@@ -24,7 +24,6 @@ export default function Cart() {
           token: localStorage.getItem('token')
         }
       })
-      console.log(response.data.data);
       setCart(response.data.data);
       setTotal(response.data.totalAfterDiscount);
       setSubtotal(response.data.totalBeforeDiscount);
@@ -41,7 +40,6 @@ export default function Cart() {
         setCartId(0);
       }
     } catch (error) {
-      console.log(error.message);
     }
   };
 
@@ -56,7 +54,6 @@ export default function Cart() {
       });
       getCart();
     } catch (error) {
-      console.log(error.message);
     }
   };
 
@@ -64,14 +61,13 @@ export default function Cart() {
     //update cart automatically updates qty
     try {
       const url = process.env.REACT_APP_API_UPDATE_QTY.replace(':id', id).replace(':option', option)
-      await api.get(url, {
+      await api.patch(url, {}, {
         headers: {
           token: localStorage.getItem('token')
         }
       });
       getCart();
     } catch (error) {
-      console.log(error.message);
     }
   };
 

@@ -1,2 +1,9 @@
 node_modules/
 PHASE_B__PLAN.md
+
+# environment files (secrets)
+projects/server/.env
+.env
+
+# build output
+projects/client/build/
