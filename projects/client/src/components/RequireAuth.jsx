@@ -18,7 +18,7 @@ export default function RequireAuth({ children, admin = false }) {
     setStatus("loading");
 
     api
-      .get("/api/admin/checkStatus")
+      .post("/api/admin/checkStatus")
       .then((res) => {
         if (cancelled) return;
         const role = res.data?.data?.role;

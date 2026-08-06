@@ -53,12 +53,12 @@ export default function Register (){
                     <div className="bg-zinc-100 rounded-lg relative mb-3"data-te-input-wrapper-init>
                         <input
                             type="text"
-                            className="peer block min-h-[auto] outline-none px-5 h-10 border rounded-md border-sm w-full bg-transparent py-[0.32rem] leading-[2.15] transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
+                            className="peer block min-h-[auto] outline-none px-5 h-10 border rounded-md border-sm w-full bg-transparent py-[0.32rem] leading-[2.15] transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none text-neutral-800 placeholder:text-neutral-400 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
                             value={name} onChange={(e) => setName(e.target.value)}
                             required/> 
 
                         <label 
-                            className="mr-5 pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[2.15] text-zinc-600 transition-all duration-200 ease-out peer-focus:-translate-y-[1.15rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[1.15rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-neutral-200">
+                            className="mr-5 pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[2.15] text-zinc-600 transition-all duration-200 ease-out peer-focus:-translate-y-[1.15rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[1.15rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none">
                             Username 
                         </label>
                     </div>
@@ -67,11 +67,11 @@ export default function Register (){
                     <div className="bg-zinc-100 rounded-lg relative mb-3"data-te-input-wrapper-init>
                         <input
                             type="text"
-                            className="peer block min-h-[auto] outline-none px-5 h-10 border rounded-md border-sm w-full bg-transparent py-[0.32rem] leading-[2.15] transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
+                            className="peer block min-h-[auto] outline-none px-5 h-10 border rounded-md border-sm w-full bg-transparent py-[0.32rem] leading-[2.15] transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none text-neutral-800 placeholder:text-neutral-400 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
                             value={email} onChange={(e) => setEmail(e.target.value)}/> 
 
                         <label
-                            className="mr-5 pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[2.15] text-zinc-600 transition-all duration-200 ease-out peer-focus:-translate-y-[1.15rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[1.15rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-neutral-200">
+                            className="mr-5 pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[2.15] text-zinc-600 transition-all duration-200 ease-out peer-focus:-translate-y-[1.15rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[1.15rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none">
                             Email 
                         </label>
                     </div>
@@ -81,11 +81,11 @@ export default function Register (){
                             type="password"
                             name="password"
                             placeholder="enter your password"
-                            className="peer block min-h-[auto] outline-none px-5 h-10 border rounded-md border-sm w-full bg-transparent py-[0.32rem] leading-[2.15] transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
+                            className="peer block min-h-[auto] outline-none px-5 h-10 border rounded-md border-sm w-full bg-transparent py-[0.32rem] leading-[2.15] transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none text-neutral-800 placeholder:text-neutral-400 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
                             value={password} onChange={(e) => setPassword(e.target.value)}/> 
 
                         <label
-                            className="mr-5 pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[2.15] text-zinc-600 transition-all duration-200 ease-out peer-focus:-translate-y-[1.15rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[1.15rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-neutral-200">
+                            className="mr-5 pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[2.15] text-zinc-600 transition-all duration-200 ease-out peer-focus:-translate-y-[1.15rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[1.15rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none">
                             Password 
                         </label>
                     </div>
@@ -93,11 +93,11 @@ export default function Register (){
                     <div className="bg-zinc-100 rounded-lg relative mb-3"data-te-input-wrapper-init>
                         <input
                             type="text"
-                            className="peer block min-h-[auto] outline-none px-5 h-10 border rounded-md border-sm w-full bg-transparent py-[0.32rem] leading-[2.15] transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:text-neutral-200 dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
+                            className="peer block min-h-[auto] outline-none px-5 h-10 border rounded-md border-sm w-full bg-transparent py-[0.32rem] leading-[2.15] transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none text-neutral-800 placeholder:text-neutral-400 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
                             value={phone} onChange={(e) => setPhone(e.target.value)}/>  
 
                         <label
-                            className="mr-5 pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[2.15] text-zinc-600 transition-all duration-200 ease-out peer-focus:-translate-y-[1.15rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[1.15rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none dark:text-neutral-200 dark:peer-focus:text-neutral-200">
+                            className="mr-5 pointer-events-none absolute top-0 left-3 mb-0 max-w-[90%] origin-[0_0] truncate pt-[0.37rem] leading-[2.15] text-zinc-600 transition-all duration-200 ease-out peer-focus:-translate-y-[1.15rem] peer-focus:scale-[0.8] peer-focus:text-primary peer-data-[te-input-state-active]:-translate-y-[1.15rem] peer-data-[te-input-state-active]:scale-[0.8] motion-reduce:transition-none">
                             Phone Number 
                         </label>
                     </div>

@@ -56,17 +56,20 @@ module.exports = {
             }, {transaction: t})
 
 
-            // step 5 : kirim email
-            const template = await fs.readFile(path.resolve(__dirname, '../template/confirmation.html'), 'utf-8')
-            const templateToCompile = handlebars.compile(template)
-            const newTemplate = templateToCompile({username:username, url: `${process.env.CLIENT_BASE_URL || 'https://jcwd230204.purwadhikabootcamp.com'}/activation/${resCreateUser.id}`,})
-     
-            await transporter.sendMail({
-                from: 'GAMEPEDIA',
-                to: email,
-                subject: 'Account Activation',
-                html: newTemplate
-            })
+            // step 5 : kirim email (non-blocking)
+            try {
+                const template = await fs.readFile(path.resolve(__dirname, '../template/confirmation.html'), 'utf-8')
+                const templateToCompile = handlebars.compile(template)
+                const newTemplate = templateToCompile({username:username, url: `${process.env.CLIENT_BASE_URL || 'https://jcwd230204.purwadhikabootcamp.com'}/activation/${resCreateUser.id}`,})
+                await transporter.sendMail({
+                    from: 'GAMEPEDIA',
+                    to: email,
+                    subject: 'Account Activation',
+                    html: newTemplate
+                })
+            } catch (emailError) {
+                console.error("activation email send failed:", emailError)
+            }
 
             // step 6 : kirim response
             await t.commit()

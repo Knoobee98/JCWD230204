@@ -1,6 +1,7 @@
 import api from "../../utils/api";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect} from "react";
+import { toast, Toaster } from "react-hot-toast";
 import NavbarUser from "../../components/navbaruser";
 import HomeMenu from "../../components/homemenu";
 import Footer from "../../components/footer";
@@ -13,10 +14,12 @@ export default function Activation(){
         try {
             const userId = Location.pathname.split('/').pop();
             await api.patch(`${process.env.REACT_APP_API_BASE_URL}/api/users/activation/${userId}`, {id: userId})
+            toast.success("Account Verified!");
             setTimeout(()=> {
                 Navigate("/user/login")
             }, 3000)
         } catch (error) {
+            toast.error(error.response?.data?.message || error.message);
         }
     }
 
@@ -41,6 +44,7 @@ export default function Activation(){
                 </div>
                 </div>
         </div>
+        <Toaster />
         <Footer/>
         </>
     )

@@ -86,6 +86,26 @@ input[type="search"]::-webkit-search-results-decoration {
     @apply placeholder-slate-400;
 }
 
+.form-input,
+.form-textarea {
+    color: #1e293b;
+    -webkit-text-fill-color: #1e293b;
+    caret-color: #1e293b;
+    forced-color-adjust: none;
+}
+
+.form-input:-webkit-autofill,
+.form-input:-webkit-autofill:hover,
+.form-input:-webkit-autofill:focus,
+.form-textarea:-webkit-autofill,
+.form-textarea:-webkit-autofill:hover,
+.form-textarea:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset;
+    -webkit-text-fill-color: #1e293b !important;
+    caret-color: #1e293b;
+    transition: background-color 9999s ease-in-out 0s;
+}
+
 .form-select {
     @apply pr-10;
 }
