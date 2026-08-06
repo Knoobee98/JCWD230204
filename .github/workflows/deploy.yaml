@@ -50,6 +50,8 @@ jobs:
             EMAIL_PASS=${{ secrets.EMAIL_PASS }}
             RAJAONGKIR_API_KEY=${{ secrets.RAJAONGKIR_API_KEY }}
             OPENCAGE_API_KEY=${{ secrets.OPENCAGE_API_KEY }}
+            CLIENT_BASE_URL=${{ secrets.CLIENT_BASE_URL }}
+            CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}
             EOF
             npm install
             pm2 restart deploy.config.js || pm2 start deploy.config.js
