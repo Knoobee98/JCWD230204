@@ -26,6 +26,7 @@ const {hashPassword, hashMatch} = require('./../lib/hash')
 const {createToken} = require('../lib/jwtoken')
 
 const transporter = require('./../helpers/transport');
+const { getEmailLog } = require('./../helpers/emailLog');
 const fs = require('fs').promises
 const handlebars = require('handlebars');
 
@@ -1008,6 +1009,23 @@ module.exports = {
             res.status(404).send({
                 isError: true,
                 message: "Get Settings Failed",
+                data: null,
+            })
+        }
+    },
+
+    emailStatus: async(req, res) => {
+        try {
+            res.status(200).send({
+                isError: false,
+                message: "Email Log",
+                data: getEmailLog(),
+            })
+        } catch (error) {
+            console.error("emailStatus error:", error)
+            res.status(404).send({
+                isError: true,
+                message: "Get Email Log Failed",
                 data: null,
             })
         }

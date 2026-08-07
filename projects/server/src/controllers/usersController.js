@@ -15,6 +15,7 @@ const {hashPassword, hashMatch} = require('./../lib/hash')
 const {createToken, createResetToken, validateToken} = require('../lib/jwtoken')
 
 const transporter = require('./../helpers/transport');
+const { logEmail } = require('./../helpers/emailLog');
 const fs = require('fs').promises
 const handlebars = require('handlebars');
 const path = require("path");
@@ -67,8 +68,8 @@ module.exports = {
                         html: newTemplate
                     })
                 })
-                .then(() => console.log("activation email sent"))
-                .catch((emailError) => console.error("activation email send failed:", emailError))
+                .then(() => { console.log("activation email sent"); logEmail({to: email, subject: 'Account Activation', ok: true}) })
+                .catch((emailError) => { console.error("activation email send failed:", emailError); logEmail({to: email, subject: 'Account Activation', ok: false, error: emailError.message, smtpResponse: emailError.response || null}) })
 
             // step 6 : kirim response
             await t.commit()
@@ -244,8 +245,8 @@ module.exports = {
                         html: newTemplate,
                     })
                 })
-                .then(() => console.log("reset password email sent"))
-                .catch((emailError) => console.error("reset password email send failed:", emailError))
+                .then(() => { console.log("reset password email sent"); logEmail({to: email, subject: 'Reset Password', ok: true}) })
+                .catch((emailError) => { console.error("reset password email send failed:", emailError); logEmail({to: email, subject: 'Reset Password', ok: false, error: emailError.message, smtpResponse: emailError.response || null}) })
 
             res.status(200).send({
                 isError: false,

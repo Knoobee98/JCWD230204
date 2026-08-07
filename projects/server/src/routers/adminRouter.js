@@ -26,5 +26,6 @@ router.patch('/updateUser/:id', tokenVerify, requireRole(ADMIN_ROLES), adminCont
 router.delete('/deleteUser/:id', tokenVerify, requireRole(ADMIN_ROLES), adminController.deleteUser)
 router.get('/getSettings', tokenVerify, requireRole(ADMIN_ROLES), adminController.getSettings)
 router.post('/saveSettings', tokenVerify, requireRole(ADMIN_ROLES), adminController.saveSettings)
+router.get('/emailStatus', tokenVerify, requireRole(ADMIN_ROLES), adminController.emailStatus)
 
 module.exports = router;
