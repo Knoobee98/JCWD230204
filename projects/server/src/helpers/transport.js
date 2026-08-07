@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer')
+const dns = require('dns')
 require('dotenv').config()
 
 const transporter = nodemailer.createTransport({
@@ -11,7 +12,11 @@ const transporter = nodemailer.createTransport({
     },
     tls: {
         rejectUnauthorized: false
-    }
+    },
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 30000,
+    lookup: (hostname, options, callback) => dns.lookup(hostname, { ...options, family: 4 }, callback)
 })
 
 module.exports = transporter
