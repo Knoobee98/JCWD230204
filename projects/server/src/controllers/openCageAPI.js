@@ -1,6 +1,5 @@
 const axios = require("axios");
 const opencageClient = require("opencage-api-client");
-const ip = require("ip");
 const reqIp = require("request-ip");
 require("dotenv").config();
 
